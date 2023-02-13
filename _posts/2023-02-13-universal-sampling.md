@@ -267,7 +267,7 @@ sample0.equals(sample1)
 
 
 
-More general forms of random sampling are usually incovenient. For example, sampling half of our users requires deduplicating the users and sampling from that set, then filtering the original data.
+More general forms of random sampling are usually inconvenient. For example, sampling users and keeping their associated activity requires de-duplicating the users, sampling from the user set, and filtering the original data.
 
 
 ```python
