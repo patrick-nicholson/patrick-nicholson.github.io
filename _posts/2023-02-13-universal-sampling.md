@@ -42,7 +42,7 @@ spark = SparkSession.builder.getOrCreate()
 
 ## Hashing
 
-Let's take a look at universal hashing in Python with `scikit-learn`'s MurmurHash implementation. For exmaple inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$. 
+Let's take a look at universal hashing in Python with `scikit-learn`'s MurmurHash implementation. For example inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$. 
 
 
 ```python
