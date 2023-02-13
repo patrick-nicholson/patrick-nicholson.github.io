@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-# from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession
 from scipy import stats
 from sklearn.utils.murmurhash import murmurhash3_32 as mmhash
 from typing import Union
@@ -158,10 +158,7 @@ ax.set_title("Distribution of truncated MD5 hashes");
 <div class="alert alert-block alert-info" > I'm going to compare the <code>pandas</code> sampling interface with universal sampling. The <code>pandas</code> interface is generally representative of the tools I'm familiar with (PySpark, R base/<code>dplyr</code>, SQL, etc.). It would not surprise me to learn that there are richer implementations around that don't have some of the downsides I'll point out below. </div> 
 
 
-The simplest application of universal hashing is random sampling. We start with a representative dataframe:
-* `user_id` is a user UUID
-* `activity_id` is an activity UUID
-* `score` is a purely random sample from a normal distribution
+The simplest application of universal hashing is random sampling. We start with a representative dataframe of users, individual activity, and scores.
 
 
 ```python
@@ -170,14 +167,16 @@ avg_posts_per_user = 5
 
 df = pd.DataFrame(
     [
-        (user_id, uuid4(), score)
-        for posts in random_state.poisson(
-            avg_posts_per_user, users
+        (user_id, activity_id, score)
+        for user_id, posts in zip(
+            random_state.randint(10**6, 10**7, users),
+            random_state.poisson(avg_posts_per_user, users),
         )
-        for user_id in (uuid4(),)
-        for score in random_state.normal(0, 1, posts)
+        for activity_id, score in enumerate(
+            random_state.normal(0, 1, posts)
+        )
     ],
-    columns=["user_id", "activity_id", "score"],
+    columns=["user_id", "activity_sequence", "score"],
 )
 ```
 
@@ -186,7 +185,7 @@ Dataframes in various packages or platforms usually make _simple_ random samplin
 
 ```python
 sample_rate = 0.15
-df.sample(frac=sample_rate)
+df.sample(frac=sample_rate).head()
 ```
 
 
@@ -211,80 +210,43 @@ df.sample(frac=sample_rate)
     <tr style="text-align: right;">
       <th></th>
       <th>user_id</th>
-      <th>activity_id</th>
+      <th>activity_sequence</th>
       <th>score</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>42123</th>
-      <td>2146d00d-da8c-4b7a-afe2-069d0122e654</td>
-      <td>b2d392b5-34c8-45ed-a10d-12647630c824</td>
-      <td>0.613257</td>
+      <th>36567</th>
+      <td>7518998</td>
+      <td>2</td>
+      <td>0.461506</td>
     </tr>
     <tr>
-      <th>15501</th>
-      <td>9a30100c-bb59-4537-ac06-407104c278a5</td>
-      <td>9e8cb4d1-ca02-48b2-ac8a-4cdc5781545f</td>
-      <td>0.489327</td>
+      <th>39643</th>
+      <td>7893362</td>
+      <td>2</td>
+      <td>2.028855</td>
     </tr>
     <tr>
-      <th>36599</th>
-      <td>5c7df545-ee6b-4404-8ca1-acf2456437bb</td>
-      <td>90b7512f-b055-420c-a390-3d973e70a2e5</td>
-      <td>-0.224887</td>
+      <th>11258</th>
+      <td>5041735</td>
+      <td>4</td>
+      <td>2.508135</td>
     </tr>
     <tr>
-      <th>29152</th>
-      <td>6c006f1f-f585-435e-88ac-e4216fcb941f</td>
-      <td>7f622e7e-082b-41bd-b3c2-0e717dc4da71</td>
-      <td>-0.597781</td>
+      <th>40162</th>
+      <td>9197996</td>
+      <td>3</td>
+      <td>0.774906</td>
     </tr>
     <tr>
-      <th>48048</th>
-      <td>c4b5892a-0766-4d9a-8cb0-629697c7748e</td>
-      <td>bebcc679-66cf-49be-a362-69601525fd9c</td>
-      <td>0.722863</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>22002</th>
-      <td>62f0f65e-ba69-4e80-b7f0-84005e3696c6</td>
-      <td>8c3c54e4-8c44-4120-82a9-27f2a8c90fea</td>
-      <td>-0.449790</td>
-    </tr>
-    <tr>
-      <th>3576</th>
-      <td>a9a0d17a-87e4-4db2-b266-a9e52224cf35</td>
-      <td>ca765b75-d088-4b92-8a9b-91c5b10b7f64</td>
-      <td>-0.600585</td>
-    </tr>
-    <tr>
-      <th>14450</th>
-      <td>73b70191-0e65-4455-95cf-ef5681076b9c</td>
-      <td>48783b4b-c8b1-4f98-9579-96c1cc75d994</td>
-      <td>1.635014</td>
-    </tr>
-    <tr>
-      <th>10454</th>
-      <td>9bdf3218-931d-435c-8e95-b00115fefedc</td>
-      <td>0ba40f6a-f577-4955-b756-bf39f99051c1</td>
-      <td>-0.115104</td>
-    </tr>
-    <tr>
-      <th>47444</th>
-      <td>388fb874-f67d-42ba-a7cc-6d66bace4993</td>
-      <td>41447a12-e3b0-44be-8cde-829f7a466889</td>
-      <td>0.295622</td>
+      <th>25381</th>
+      <td>2801474</td>
+      <td>1</td>
+      <td>-0.019752</td>
     </tr>
   </tbody>
 </table>
-<p>7465 rows × 3 columns</p>
 </div>
 
 
@@ -314,6 +276,7 @@ More general forms of random sampling are usually incovenient. For example, samp
     .drop_duplicates()
     .sample(frac=sample_rate)
     .merge(df)
+    .head()
 )
 ```
 
@@ -339,80 +302,43 @@ More general forms of random sampling are usually incovenient. For example, samp
     <tr style="text-align: right;">
       <th></th>
       <th>user_id</th>
-      <th>activity_id</th>
+      <th>activity_sequence</th>
       <th>score</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>2949f3e1-0541-4f47-8008-3a927fa572c5</td>
-      <td>cdc62abd-2fa7-4720-84db-bc10622d8e21</td>
-      <td>-0.771325</td>
+      <td>2544945</td>
+      <td>0</td>
+      <td>-1.386094</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>2949f3e1-0541-4f47-8008-3a927fa572c5</td>
-      <td>6a8cb546-ce66-43b0-b5e5-dad4b3f0916b</td>
-      <td>1.041870</td>
+      <td>2544945</td>
+      <td>1</td>
+      <td>-0.826280</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2949f3e1-0541-4f47-8008-3a927fa572c5</td>
-      <td>68ea7ee1-120f-4ad9-ae3f-1716fce8f7e8</td>
-      <td>-1.711934</td>
+      <td>4614674</td>
+      <td>0</td>
+      <td>-0.039053</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>2949f3e1-0541-4f47-8008-3a927fa572c5</td>
-      <td>e71a7993-8483-49fb-b915-ee2d08889b16</td>
-      <td>0.624260</td>
+      <td>4614674</td>
+      <td>1</td>
+      <td>0.494212</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>2949f3e1-0541-4f47-8008-3a927fa572c5</td>
-      <td>9b4665df-c187-4f5e-8fc2-8274697cee39</td>
-      <td>0.337053</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>7446</th>
-      <td>8dcf2c48-a709-4355-8656-46968f073e57</td>
-      <td>634d97f9-6cad-4633-90dd-f0f07d21429f</td>
-      <td>0.881056</td>
-    </tr>
-    <tr>
-      <th>7447</th>
-      <td>bf0d2973-edb4-4abf-8712-f82ea2cba6f5</td>
-      <td>a9e49605-5d35-47fb-a56f-37a0f88375ea</td>
-      <td>-2.327481</td>
-    </tr>
-    <tr>
-      <th>7448</th>
-      <td>bf0d2973-edb4-4abf-8712-f82ea2cba6f5</td>
-      <td>b3c24ccc-987b-4638-a7c4-258f8c0eb865</td>
-      <td>1.913991</td>
-    </tr>
-    <tr>
-      <th>7449</th>
-      <td>bf0d2973-edb4-4abf-8712-f82ea2cba6f5</td>
-      <td>d8cc684b-f9aa-41e8-ab80-069ad3cf67a6</td>
-      <td>-1.274627</td>
-    </tr>
-    <tr>
-      <th>7450</th>
-      <td>bf0d2973-edb4-4abf-8712-f82ea2cba6f5</td>
-      <td>7ccb6baf-9b9e-48e7-b591-89774c7aedee</td>
-      <td>0.223246</td>
+      <td>4614674</td>
+      <td>2</td>
+      <td>-1.564690</td>
     </tr>
   </tbody>
 </table>
-<p>7451 rows × 3 columns</p>
 </div>
 
 
@@ -497,14 +423,14 @@ l.merge(r, how="outer", indicator=True).groupby("_merge").count()
 
 
 
-The kinds of problems can be addressed with universal simple random sampling. For a hash function $f_{[a,b)}$ producing hash values $h_i \in \left[a, b \right)$ and sample rate $r$, it's simplest and most efficient to transform the rate to a ceiling value such that we keep $h_i < \left( a + r * (b - a) \right)$.
+The kinds of problems can be addressed with universal random sampling. For a hash function $f_{[a,b)}$ producing hash values $h_i \in \left[a, b \right)$ and sample rate $r$, we transform the rate to a ceiling value such that we keep $h_i < \left( a + r * (b - a) \right)$.
 
 We can still do independent sampling based on a value that's unique to a row (here just the row number).
 
 
 ```python
 sample_ceiling = -(2**31) + int(sample_rate * 2**32)
-df[df.index.map(mmhash) < sample_ceiling]
+df[df.index.map(mmhash) < sample_ceiling].head()
 ```
 
 
@@ -529,80 +455,43 @@ df[df.index.map(mmhash) < sample_ceiling]
     <tr style="text-align: right;">
       <th></th>
       <th>user_id</th>
-      <th>activity_id</th>
+      <th>activity_sequence</th>
       <th>score</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>8</th>
-      <td>8ff6d097-7e7d-429b-9182-bf5966cdc605</td>
-      <td>2b0583d2-9493-4308-8440-a090ff21faf7</td>
-      <td>-0.204278</td>
+      <td>4521687</td>
+      <td>3</td>
+      <td>-0.996978</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>bccdc4c9-e0be-40c8-aee9-bb5db1eb7073</td>
-      <td>45244d60-a7d3-43bd-83b1-56fffe0afa2d</td>
-      <td>-1.006406</td>
+      <td>1300649</td>
+      <td>4</td>
+      <td>0.413620</td>
     </tr>
     <tr>
       <th>33</th>
-      <td>e394c3b2-1888-4dbe-91a3-1987f4277f79</td>
-      <td>3560e6b0-638c-4f28-ab80-07cc2af4cb15</td>
-      <td>1.430888</td>
+      <td>2371857</td>
+      <td>6</td>
+      <td>-1.756637</td>
     </tr>
     <tr>
       <th>34</th>
-      <td>e394c3b2-1888-4dbe-91a3-1987f4277f79</td>
-      <td>5cc82930-6965-44e0-b12b-155c91db989a</td>
-      <td>0.155472</td>
+      <td>5790595</td>
+      <td>0</td>
+      <td>-0.702292</td>
     </tr>
     <tr>
       <th>35</th>
-      <td>e394c3b2-1888-4dbe-91a3-1987f4277f79</td>
-      <td>80d12d35-5b0a-4bcf-9c1d-bf5beca646d1</td>
-      <td>0.463298</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>49718</th>
-      <td>89d94a90-41ce-465a-8690-f303042709f6</td>
-      <td>05397ddf-fc37-4502-a933-bd266ae87828</td>
-      <td>0.067397</td>
-    </tr>
-    <tr>
-      <th>49720</th>
-      <td>89d94a90-41ce-465a-8690-f303042709f6</td>
-      <td>7653091c-26f2-43c3-9dd1-0194923234b1</td>
-      <td>0.658050</td>
-    </tr>
-    <tr>
-      <th>49727</th>
-      <td>a7fc8cba-66b9-4b3f-b1ad-3dd3aa566c4b</td>
-      <td>dda4b2ea-c37e-4cec-a83f-ca4e147fafa0</td>
-      <td>-1.502790</td>
-    </tr>
-    <tr>
-      <th>49744</th>
-      <td>e9d84d83-bdde-4edc-b2a7-09867a5e08b9</td>
-      <td>e7d0e95b-a54e-4b9e-8355-c4fbd50edc98</td>
-      <td>-1.757438</td>
-    </tr>
-    <tr>
-      <th>49754</th>
-      <td>cda6db16-26fe-48b1-8f45-732614895062</td>
-      <td>edd696fb-834e-4462-b68a-4bd2c21f1678</td>
-      <td>-0.753189</td>
+      <td>5790595</td>
+      <td>1</td>
+      <td>0.552699</td>
     </tr>
   </tbody>
 </table>
-<p>7413 rows × 3 columns</p>
 </div>
 
 
@@ -611,7 +500,9 @@ Sampling all data for a subset of users is as simple as changing the input to th
 
 
 ```python
-df[df["user_id"].astype(np.bytes_).map(mmhash) < sample_ceiling]
+df[
+    df["user_id"].astype(np.bytes_).map(mmhash) < sample_ceiling
+].head()
 ```
 
 
@@ -636,80 +527,43 @@ df[df["user_id"].astype(np.bytes_).map(mmhash) < sample_ceiling]
     <tr style="text-align: right;">
       <th></th>
       <th>user_id</th>
-      <th>activity_id</th>
+      <th>activity_sequence</th>
       <th>score</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>74</th>
-      <td>0d196f13-8acd-4c1f-820e-6c16d717311b</td>
-      <td>23afcefe-d18f-467c-ab60-c0d92c3a2514</td>
-      <td>1.379005</td>
+      <th>27</th>
+      <td>2371857</td>
+      <td>0</td>
+      <td>1.699181</td>
     </tr>
     <tr>
-      <th>75</th>
-      <td>0d196f13-8acd-4c1f-820e-6c16d717311b</td>
-      <td>f72bbd4e-ad9e-4855-be28-bc91e02d558d</td>
-      <td>0.228165</td>
+      <th>28</th>
+      <td>2371857</td>
+      <td>1</td>
+      <td>0.018043</td>
     </tr>
     <tr>
-      <th>76</th>
-      <td>0d196f13-8acd-4c1f-820e-6c16d717311b</td>
-      <td>c01a9f08-10ee-4ca9-a626-7b3371619426</td>
-      <td>-0.969587</td>
+      <th>29</th>
+      <td>2371857</td>
+      <td>2</td>
+      <td>0.552085</td>
     </tr>
     <tr>
-      <th>77</th>
-      <td>0d196f13-8acd-4c1f-820e-6c16d717311b</td>
-      <td>2e199bac-e3ff-4e86-9e7e-1075b5b9e31c</td>
-      <td>0.158903</td>
+      <th>30</th>
+      <td>2371857</td>
+      <td>3</td>
+      <td>0.775177</td>
     </tr>
     <tr>
-      <th>86</th>
-      <td>1e05d5e5-b264-42ac-87dd-34170bdce3aa</td>
-      <td>0f16d9f2-749f-4ead-a139-5cb694a94a85</td>
-      <td>-1.613581</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>49724</th>
-      <td>a7fc8cba-66b9-4b3f-b1ad-3dd3aa566c4b</td>
-      <td>0f191644-490f-4a2b-bc2a-f873808ace9b</td>
-      <td>-0.737764</td>
-    </tr>
-    <tr>
-      <th>49725</th>
-      <td>a7fc8cba-66b9-4b3f-b1ad-3dd3aa566c4b</td>
-      <td>8e54d914-59d7-4d1a-bc94-523dc1178041</td>
-      <td>-1.022173</td>
-    </tr>
-    <tr>
-      <th>49726</th>
-      <td>a7fc8cba-66b9-4b3f-b1ad-3dd3aa566c4b</td>
-      <td>a072ee32-3e53-4d0d-bc85-933e29f3ff17</td>
-      <td>0.229212</td>
-    </tr>
-    <tr>
-      <th>49727</th>
-      <td>a7fc8cba-66b9-4b3f-b1ad-3dd3aa566c4b</td>
-      <td>dda4b2ea-c37e-4cec-a83f-ca4e147fafa0</td>
-      <td>-1.502790</td>
-    </tr>
-    <tr>
-      <th>49728</th>
-      <td>a7fc8cba-66b9-4b3f-b1ad-3dd3aa566c4b</td>
-      <td>0422aae9-e2a6-46ce-9f24-4dfd118d35a5</td>
-      <td>1.788407</td>
+      <th>31</th>
+      <td>2371857</td>
+      <td>4</td>
+      <td>-1.122306</td>
     </tr>
   </tbody>
 </table>
-<p>7489 rows × 3 columns</p>
 </div>
 
 
@@ -775,7 +629,7 @@ l.merge(r, how="outer", indicator=True).merge(overlap).groupby(
     </tr>
     <tr>
       <th>both</th>
-      <td>79</td>
+      <td>59</td>
     </tr>
   </tbody>
 </table>
