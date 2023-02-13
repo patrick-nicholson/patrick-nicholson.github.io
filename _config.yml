@@ -1,6 +1,6 @@
 title: "Occasionally clever"
 tagline: "Combining a thing with another thing"
-description: "Techniques to borderline appalling hacks that make data science, data engineering, and machine learning work for the rest of us"
+description: "Ranging from esoteric techniques to borderline appalling hacks that make data science, data engineering, and machine learning work for the rest of us"
 url: https://patrick-nicholson.github.io
 baseurl: /
 
@@ -14,6 +14,4 @@ github:
   repo: https://github.com/patrick-nicholson/patrick-nicholson.github.io
 
 markdown: redcarpet
-#highlighter: pygments
 permalink: pretty
-#relative_permalinks: true

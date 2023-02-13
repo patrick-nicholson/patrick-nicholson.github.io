@@ -9,4 +9,4 @@ My past experience includes a long stint in adtech and a few years in public sec
 
 You can find me online on [LinkedIn](https://www.linkedin.com/in/nicholsonpatrick/) and [GitHub](https://github.com/patrick-nicholson).
 
-I'm reachable at [first name] dot [last name] at outlook dot com.
+I'm also reachable at [first name] dot [last name] at outlook dot com.
