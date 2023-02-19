@@ -1,7 +1,8 @@
 services:
 
   jupyter_sql:
-    build: .
+    container_name: myjupyter
+    image: myjupyter
     ports:
       - "8888:8888"
     volumes:
