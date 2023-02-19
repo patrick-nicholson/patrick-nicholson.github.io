@@ -1445,4 +1445,4 @@ ax.set_title(
 
 ## Wrapping up
 
-Universal bootstrap is simply the application of Poisson bootstrap leveraging the strengths of unviersal sampling: true determinism and efficiency in dataset or streams of any size. In my next post, I'll cover how you can use this for bagging. 
+Universal bootstrap is simply the application of Poisson bootstrap leveraging the strengths of universal sampling. It provides true determinism; efficiency in dataset or streams of any size; and straightforward application of complex sampling designs.  
