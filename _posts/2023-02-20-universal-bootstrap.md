@@ -1,6 +1,6 @@
 ---
 layout: post
-author: patrick-nicholson
+author: "Patrick Nicholson"
 title: "Universal bootstrap: a superpower"
 excerpt: "Bootstrapping is a commonly used in computational statistics and machine learning for uncertainty quantification, hypothesis testing, and ensembling. By combining universal sampling with Poisson bootstrap, I show how the universal bootstrap unlocks incredibly sophisticated analysis at any scale in any tool."
 image: 
