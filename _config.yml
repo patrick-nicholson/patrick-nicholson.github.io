@@ -15,3 +15,11 @@ github:
 
 markdown: redcarpet
 permalink: pretty
+
+exclude:
+  - "*.sh"
+  - "**/Dockerfile"
+  - "**/Makefile"
+  - "**/docker-compose.yaml"
+  - "**/TODO"
+  - "**/TODO.*"
