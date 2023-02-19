@@ -1,4 +1,3 @@
-bootstrap testing
 bagging
 stupid bagging trick
 visualization trick

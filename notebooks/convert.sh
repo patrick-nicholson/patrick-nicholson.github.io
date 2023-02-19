@@ -2,7 +2,7 @@
 
 source /opt/homebrew/anaconda3/bin/activate
 
-black --line-length 65 "$1"
+black --preview --line-length 65 "$1"
 
 jupyter nbconvert "$1" \
   --to markdown \

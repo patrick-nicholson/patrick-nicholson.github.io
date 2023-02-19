@@ -5,7 +5,6 @@ title: "Universal bootstrap: a superpower"
 excerpt: "Bootstrapping is a commonly used in computational statistics and machine learning for uncertainty quantification, hypothesis testing, and ensembling. By combining universal sampling with Poisson bootstrap, I show how the universal bootstrap unlocks incredibly sophisticated analysis at any scale in any tool."
 ---
 
-
 > _Look on my computational methods, ye theorists, and despair_
 
 [Bootstrapping](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) is a commonly used technique for computational statistics and machine learning. 
@@ -69,7 +68,9 @@ In [my earlier post](https://patrick-nicholson.github.io/2023/02/13/universal-sa
 
 ```python
 def poisson_thresholds(lam, tol=None):
-    """Threshold values (32-bit integers) for Poisson inverse transformation"""
+    """Threshold values (32-bit integers) for Poisson inverse 
+    transformation
+    """
 
     tol = tol or 1e-6
     pois = stats.poisson(lam)
@@ -92,7 +93,9 @@ def poisson_thresholds(lam, tol=None):
 
 
 def inverse_transform_search(thresholds, hash_values):
-    """Inverse transform search with correction to thin out tails when there are duplicated thresholds"""
+    """Inverse transform search with correction to thin out tails
+     when there are duplicated thresholds
+    """
     left = np.searchsorted(thresholds, hash_values, side="left")
     right = np.searchsorted(
         thresholds, hash_values, side="right"
@@ -328,7 +331,8 @@ fig, ax = plt.subplots()
 ax.hist(repeated_estimates)
 ax.axvline(iris["sepal_length"].mean(), c="red")
 ax.set_title(
-    "Universal bootstrap distribution of a sample statistic by repetition"
+    "Universal bootstrap distribution of a sample statistic by"
+    " repetition"
 );
 ```
 
@@ -355,8 +359,9 @@ Postgres does not have a fast, non-cryptographic hash function by default. There
 -- apply md5 as the hash function
 __md5_applied as (
     select 
-        -- packs all input columns into a single column
-        -- i find this more convenient that trying select all but a few columns
+        -- packs all input columns into a single column. i find 
+        -- this more convenient that trying select all but a few 
+        -- columns
         row({table}.*)::{table} as __data, 
         md5({column}::text) as __md5 
     from 
@@ -365,7 +370,11 @@ __md5_applied as (
 
 -- turn the md5 into a 128 bitarray
 __md5_bits as (
-    select __data, ('x' || __md5)::bit(128) as __bits from __md5_applied
+    select 
+        __data, 
+        ('x' || __md5)::bit(128) as __bits 
+    from 
+        __md5_applied
 ),
 
 -- get four 32-bit segments as 32-bit integers
@@ -613,7 +622,11 @@ Randomization is similar to what I showed in Python, but requires handling integ
 
 -- random values
 randomization as (
-    select x.* from ( values {values} ) as x(__random_index, __random_value)
+    select 
+        x.*
+    from (
+        values {values} 
+    ) as x(__random_index, __random_value)
 ),
 
 -- randomize
@@ -626,8 +639,9 @@ with_randomization as (
     select
         __data,
         (__random_index << 2) | __hash_index as __hash_index,
-        ((((__hash_value::bigint * __random_value) % 4294967295) + 4294967295) 
-              % 4294967295)::bit(32)::int as __hash_value
+        ((((__hash_value::bigint * __random_value) % 4294967295)
+            + 4294967295) % 4294967295)::bit(32)::int 
+            as __hash_value
     from
         with_hash_rows, 
         randomization
@@ -880,7 +894,8 @@ At this point, we have the data we need to estimate the bootstrap distribution.
 ```python
 _ = """
     select 
-        sum((__data).sepal_length * __weight) / sum(__weight) as estimate
+        sum((__data).sepal_length * __weight) / sum(__weight) 
+            as estimate
     from 
         with_poisson_weights 
     group by
@@ -896,7 +911,8 @@ display_sql(_)
 ```sql
 
     select 
-        sum((__data).sepal_length * __weight) / sum(__weight) as estimate
+        sum((__data).sepal_length * __weight) / sum(__weight) 
+            as estimate
     from 
         with_poisson_weights 
     group by
@@ -1054,7 +1070,8 @@ fig, ax = plt.subplots()
 ax.hist(null_distribution)
 ax.axvline(actual, color="red", ls="--")
 ax.set_title(
-    "Universal boostrap test: null distribution vs. observed difference"
+    "Universal boostrap test: null distribution vs. observed"
+    " difference"
 );
 ```
 
@@ -1096,7 +1113,8 @@ true_effect_intervention = 0.05
 # - class_id: unique class identifier
 # - student_num: anonymous student number within class
 # - intervention_class: class received intervention (binary)
-# - post_period: score is for the second test (post intervention, if received)
+# - post_period: score is for the second test (post intervention, 
+#                if received)
 # - score: standardized test score
 test_scores = pd.DataFrame(
     [
@@ -1292,7 +1310,8 @@ ax.axvline(
     ls="--",
 )
 ax.set_title(
-    "Clustered universal boostrap: null distribution vs. point estimate"
+    "Clustered universal boostrap: null distribution vs. point"
+    " estimate"
 );
 ```
 
@@ -1338,60 +1357,18 @@ with_test_design as (
         __data,
         -- collapse the hashes from num_hashes to (num_hashes / 2)...
         __hash_index / 2 as __hash_index,
-        -- ...where one of the collapsed hashes is now for the test group
+        -- ...where one of the collapsed hashes is now for 
+        -- the test group
         __hash_index % 2 as __test,
-        case when (__hash_index % 2) = 0 then {control_case} else {test_case} end as __weight
+        case 
+            when (__hash_index % 2) = 0 then {control_case} 
+            else {test_case} 
+            end as __weight
     from
         with_randomization
 )
 
 ```
-
-
-
-
-```python
-_ = """
-, __aggregation as (
-    select
-        __hash_index,
-        __test,
-        (__data).post_period,
-        sum((__data).score * __weight) / sum(__weight) as cell
-    from
-        with_test_design
-    where
-        __weight > 0
-    group by
-        __hash_index,
-        __test,
-        post_period
-),
-
-__pivot as (
-    select
-        __hash_index,
-        sum(cell * __test * post_period) as test_post,
-        sum(cell * __test * (1 - post_period)) as test_pre,
-        sum(cell * (1 - __test) * post_period) as control_post,
-        sum(cell * (1 - __test) * (1 - post_period)) as control_pre
-    from
-        __aggregation
-    group by
-        __hash_index
-)
-
-select
-    __hash_index,
-    (test_post - test_pre) - (control_post - control_pre) as estimate
-from
-    __pivot
-"""
-
-display_sql(_)
-```
-
-
 
 
 ```sql
