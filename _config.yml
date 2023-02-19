@@ -16,6 +16,9 @@ github:
 markdown: redcarpet
 permalink: pretty
 
+plugins:
+  - jekyll-seo-tag
+
 exclude:
   - "*.sh"
   - "**/Dockerfile"

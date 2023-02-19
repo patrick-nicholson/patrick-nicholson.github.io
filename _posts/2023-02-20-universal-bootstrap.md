@@ -3,6 +3,8 @@ layout: post
 author: patrick-nicholson
 title: "Universal bootstrap: a superpower"
 excerpt: "Bootstrapping is a commonly used in computational statistics and machine learning for uncertainty quantification, hypothesis testing, and ensembling. By combining universal sampling with Poisson bootstrap, I show how the universal bootstrap unlocks incredibly sophisticated analysis at any scale in any tool."
+image: 
+    path: /notebooks/universal-bootstrap_files/universal-bootstrap_47_0.png
 ---
 
 > _Look on my computational methods, ye theorists, and despair_
@@ -260,7 +262,7 @@ ax.set_title("Bootstrap distribution of a sample statistic");
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_11_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_11_0.png)
     
 
 
@@ -302,7 +304,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_14_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_14_0.png)
     
 
 
@@ -338,7 +340,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_16_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_16_0.png)
     
 
 
@@ -943,7 +945,7 @@ ax.set_title("Postgres universal bootstrap distribution");
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_34_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_34_0.png)
     
 
 
@@ -1077,7 +1079,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_40_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_40_0.png)
     
 
 
@@ -1317,7 +1319,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_47_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_47_0.png)
     
 
 
@@ -1439,7 +1441,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/sampling/universal-bootstrap_files/universal-bootstrap_53_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_53_0.png)
     
 
 
