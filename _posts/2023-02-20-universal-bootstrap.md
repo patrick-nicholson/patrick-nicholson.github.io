@@ -40,6 +40,11 @@ Bootstrapping is based on sampling with replacement. [Poisson sampling](https://
 
 In [my earlier post](https://patrick-nicholson.github.io/2023/02/13/universal-sampling/), I demonstrated a method of sampling from a Poisson distribution based on universal hash functions. Composing this with Poisson sampling gives us the universal bootstrap.
 
+In short:
+* A universal hash function deterministically maps an input to a uniformly distributed integer in the full integer range
+* Uniform integers can be transformed into Poisson values
+* Multiplying the hash value by another random integer yields an uncorrelated random integer
+* Ergo, mapping the products of a hash value by $r$ random integers to $\text{Pois}(1)$ values provides $r$ deterministic bootstrap sample weights
 
 ```python
 def poisson_thresholds(lam, tol=None):
