@@ -58,7 +58,7 @@ test_scores.to_sql(
 
 Suppose `iris` is a Postgres table and we want to get the bootstrap distribution of a statistic. A naive way to do this is to repeatedly query the table. A better way is to use the universal bootstrap.
 
-Postgres does not have a fast, non-cryptographic hash function by default. There are some extensions available that provide them, and you could write a user-defined function to expose one from another language. However, to demonstrate that this is possible in pure SQL, I use MD5 as my hashing function. Since MD5 returns 128 bits, I actually split this up into four 32-bit hashes. You can certainly treat each hash column separately, but it's straightforward to turn them into row values into a single column that is much sipler to use.
+Postgres does not have a fast, non-cryptographic hash function by default. There are some extensions available that provide them, and you could write a user-defined function to expose one from another language. However, to demonstrate that this is possible in pure SQL, I use MD5 as my hashing function. Since MD5 returns 128 bits, I actually split this up into four 32-bit hashes. You can certainly treat each hash column separately, but it's straightforward to turn them into row values into a single column that is much simpler to use.
 
 
 
@@ -541,7 +541,7 @@ fig.tight_layout();
 
 ## Hypothesis testing
 
-Yes, you can even do this in SQL. Since difference-in-differences has a simple analytical solution, I'm going to repeat the educational intervention analysis from my previous post. All of the functionality required to do this is included in the functions above. The only change I need to make in configuring a bootstrap for two groups (test and control).
+Yes, you can even do this in SQL. Since difference-in-differences has a simple analytical solution, I'm going to repeat the educational intervention analysis from my previous post. All of the functionality required to do this is included in the functions above. The only change I need to make is configuring the bootstrap for two groups (test and control).
 
 
 
@@ -559,8 +559,7 @@ bootstrap as (
         case when __group_index = 0 then 1 else 0 end test, 
         post_period as post,
         avg(score) as cell,
-        count(1) as samples,
-        count(distinct class_id) as units
+        count(1) as samples
     from
         test_scores,
         configure,
@@ -573,8 +572,6 @@ pivot as (
     select
         __replication_index,
         sum(samples) as samples,
-        sum(units * test) as test_units,
-        sum(units * (1 - test)) as control_units,
         sum(cell * test * post) as test_post,
         sum(cell * test * (1 - post)) as test_pre,
         sum(cell * (1 - test) * post) as control_post,
@@ -588,8 +585,6 @@ pivot as (
 select
     __replication_index,
     samples,
-    test_units,
-    control_units,
     (test_post - test_pre) - (control_post - control_pre) as estimate
 from
     pivot
@@ -626,4 +621,4 @@ fig.tight_layout();
 
 ## Wrapping up
 
-You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins feel it.
+You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins hate me.
