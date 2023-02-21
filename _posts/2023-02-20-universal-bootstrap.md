@@ -6,12 +6,12 @@ excerpt: "Bootstrapping is commonly used in computational statistics and machine
 image:
     path: /notebooks/universal-bootstrap_files/universal-bootstrap_27_0.png
 ---
- 
+
 > _Look on my computational methods, ye theorists, and despair_
 
 [Bootstrapping](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) is a commonly used technique for computational statistics and machine learning. 
 * [Uncertainty quantification](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)): an approximate distribution of a sample statistic (e.g., mean) is the empirical distribution of the same statistic calculated over bootstrap samples
-* [Bootstrap tests](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Bootstrap_hypothesis_testing): a distribution-free hypothesis test by using the empirical distribution of the test statistic from boostrap samples that randomize the test design
+* [Bootstrap tests](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Bootstrap_hypothesis_testing): a distribution-free hypothesis test by using the empirical distribution of the test statistic from bootstrap samples that randomize the test design
 * [Bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating): improving accuracy and reducing variance of a learner by training the model on subsets of resampled 
 
 So how _should_ you bootstrap? In an earlier post, I covered [universal sampling](https://patrick-nicholson.github.io/2023/02/13/universal-sampling/) and its advantages. In this post, I show how this can be extended with sampling with replacement to create the universal bootstrap.
@@ -28,6 +28,7 @@ from scipy import stats
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LinearRegression
 from sklearn.utils.murmurhash import murmurhash3_32 as mmhash
+from uuid import uuid4
 
 %matplotlib inline
 
@@ -38,13 +39,14 @@ random_state = np.random.RandomState(12345)
 
 Bootstrapping is based on sampling with replacement. [Poisson sampling](https://en.wikipedia.org/wiki/Poisson_sampling) is one such method. For a sample size $N$ and resampling size $S$, the resampling weights for each observation follows the $\text{Pois} \left( \frac{S}{N} \right)$ distribution. The [Poisson bootstrap](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Poisson_bootstrap), commonly used for bootstrapping streams and large datasets, is the particular case where $N = S$, i.e., $\text{Pois}(1)$.
 
-In [my earlier post](https://patrick-nicholson.github.io/2023/02/13/universal-sampling/), I demonstrated a method of sampling from a Poisson distribution based on universal hash functions. Composing this with Poisson sampling gives us the universal bootstrap.
+In [my earlier post](/2023/02/13/universal-sampling/), I demonstrated a method of sampling from a Poisson distribution based on universal hash functions. Composing this with Poisson sampling gives us the universal bootstrap.
 
 In short:
 * A universal hash function deterministically maps an input to a uniformly distributed integer in the full integer range
 * Uniform integers can be transformed into Poisson values
 * Multiplying the hash value by another random integer yields an uncorrelated random integer
 * Ergo, mapping the products of a hash value by $r$ random integers to $\text{Pois}(1)$ values provides $r$ deterministic bootstrap sample weights
+
 
 ```python
 def poisson_thresholds(lam, tol=None):
@@ -73,7 +75,7 @@ def poisson_thresholds(lam, tol=None):
 
 
 def inverse_transform_search(thresholds, hash_values):
-    """Inverse transform search with correction to thin out tails
+    """Inverse transform search with correction to thin out tails 
     when there are duplicated thresholds
     """
     left = np.searchsorted(thresholds, hash_values, side="left")
@@ -203,7 +205,7 @@ iris["sepal_length"].sample(frac=1.0, replace=True).mean()
 
 
 
-    5.906666666666667
+    5.8580000000000005
 
 
 
@@ -211,7 +213,7 @@ iris["sepal_length"].sample(frac=1.0, replace=True).mean()
 ```python
 n = len(iris)
 
-bs_estimates = (
+baby_null = (
     iris["sepal_length"]
     .sample(
         frac=bootstrap_replications,
@@ -223,7 +225,7 @@ bs_estimates = (
 )
 
 fig, ax = plt.subplots()
-ax.hist(bs_estimates)
+ax.hist(baby_null)
 ax.axvline(iris["sepal_length"].mean(), c="red")
 ax.set_title("Bootstrap distribution of a sample statistic");
 ```
@@ -238,9 +240,11 @@ A single universal bootstrap estimate is the sample statistic weighted by Poisso
 
 
 ```python
-hashes = mmhash(iris.index.values.astype(np.int32))
-weights = poisson_sample_weight(hashes, 1)
-np.average(iris["sepal_length"], weights=weights)
+baby_hashes = mmhash(iris.index.values.astype(np.int32))
+np.average(
+    iris["sepal_length"],
+    weights=poisson_sample_weight(baby_hashes, 1),
+)
 ```
 
 
@@ -255,15 +259,15 @@ np.average(iris["sepal_length"], weights=weights)
 randomization = random_state.randint(
     -(2**31), 2**31, bootstrap_replications, dtype=np.int32
 )
-weights = poisson_sample_weight(
-    np.multiply.outer(hashes, randomization), 1
+baby_weights = poisson_sample_weight(
+    np.multiply.outer(baby_hashes, randomization), 1
 )
-poisson_bs_estimates = (
-    weights * iris["sepal_length"].values[:, None]
-).sum(axis=0) / weights.sum(axis=0)
+poisson_baby_null = (
+    baby_weights * iris["sepal_length"].values[:, None]
+).sum(axis=0) / baby_weights.sum(axis=0)
 
 fig, ax = plt.subplots()
-ax.hist(poisson_bs_estimates)
+ax.hist(poisson_baby_null)
 ax.axvline(iris["sepal_length"].mean(), c="red")
 ax.set_title(
     "Universal bootstrap distribution of a sample statistic"
@@ -281,19 +285,19 @@ Of course, you can also do this by repeating observations based on the Poisson w
 
 ```python
 values = np.tile(iris["sepal_length"], bootstrap_replications)
-weights = weights.T.ravel()
+baby_weights = baby_weights.T.ravel()
 replications = np.repeat(
     np.arange(bootstrap_replications), len(iris)
 )
-values, weights, replications = (
-    values[weights > 0],
-    weights[weights > 0],
-    replications[weights > 0],
+values, baby_weights, replications = (
+    values[baby_weights > 0],
+    baby_weights[baby_weights > 0],
+    replications[baby_weights > 0],
 )
 
 repeated_estimates = (
-    pd.Series(np.repeat(values, weights))
-    .groupby(np.repeat(replications, weights))
+    pd.Series(np.repeat(values, baby_weights))
+    .groupby(np.repeat(replications, baby_weights))
     .mean()
 )
 
@@ -371,24 +375,27 @@ purchases = pd.DataFrame(
 )
 ```
 
-The universal boostrap is changed only slightly: we now generate test and control weights according to their sample sizes. Each replication has pseudo-test and pseudo-control samples, from which we calculate the test value.
-
-The test is then comparing the null distribution to the observed statistic from the true test and control groups.
+The universal bootstrap is changed only slightly: we now generate test and control weights according to their sample sizes. Each replication has pseudo-test and pseudo-control samples, from which we calculate the test value.
 
 
 ```python
 test_randomization, control_randomization = random_state.randint(
     -(2**31), 2**31, (2, bootstrap_replications), np.int32
 )
+```
 
-hashes = (
+The test is then comparing the null distribution to the observed statistic from the true test and control groups.
+
+
+```python
+offer_hashes = (
     purchases["customer_uuid"]
     .map(mmhash)
     .values.astype(np.int32)
 )
 
 test_weights = poisson_sample_weight(
-    np.multiply.outer(hashes, test_randomization),
+    np.multiply.outer(offer_hashes, test_randomization),
     test_percent_offer,
 )
 test = (test_weights.T * purchases["purchases"].values).sum(
@@ -397,7 +404,7 @@ test = (test_weights.T * purchases["purchases"].values).sum(
 del test_weights
 
 control_weights = poisson_sample_weight(
-    np.multiply.outer(hashes, control_randomization),
+    np.multiply.outer(offer_hashes, control_randomization),
     1.0 - test_percent_offer,
 )
 control = (
@@ -405,25 +412,25 @@ control = (
 ).sum(axis=1) / control_weights.sum(axis=0)
 del control_weights
 
-null_distribution = test - control
+offer_null_distribution = test - control
 
 control, test = purchases.groupby("received_offer")[
     "purchases"
 ].mean()
-actual = test - control
+offer_point_est = test - control
 
 fig, ax = plt.subplots()
-ax.hist(null_distribution)
-ax.axvline(actual, color="red", ls="--")
+ax.hist(offer_null_distribution)
+ax.axvline(offer_point_est, color="red", ls="--")
 ax.set_title(
-    "Universal boostrap test: null distribution vs. observed"
+    "Universal bootstrap test: null distribution vs. observed"
     " difference"
 );
 ```
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_20_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_22_0.png)
     
 
 
@@ -535,16 +542,16 @@ fit.summary(slim=True)
 <table class="simpletable">
 <caption>OLS Regression Results</caption>
 <tr>
-  <th>Dep. Variable:</th>      <td>score</td>   <th>  R-squared:         </th> <td>   0.005</td>
+  <th>Dep. Variable:</th>      <td>score</td>   <th>  R-squared:         </th> <td>   0.006</td>
 </tr>
 <tr>
   <th>Model:</th>               <td>OLS</td>    <th>  Adj. R-squared:    </th> <td>   0.005</td>
 </tr>
 <tr>
-  <th>No. Observations:</th>  <td>  4924</td>   <th>  F-statistic:       </th> <td>   8.939</td>
+  <th>No. Observations:</th>  <td>  5034</td>   <th>  F-statistic:       </th> <td>   10.26</td>
 </tr>
 <tr>
-  <th>Covariance Type:</th>  <td>nonrobust</td> <th>  Prob (F-statistic):</th> <td>6.65e-06</td>
+  <th>Covariance Type:</th>  <td>nonrobust</td> <th>  Prob (F-statistic):</th> <td>9.91e-07</td>
 </tr>
 </table>
 <table class="simpletable">
@@ -552,16 +559,16 @@ fit.summary(slim=True)
                  <td></td>                   <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
 </tr>
 <tr>
-  <th>Intercept</th>                      <td>   -0.0086</td> <td>    0.041</td> <td>   -0.208</td> <td> 0.835</td> <td>   -0.090</td> <td>    0.073</td>
+  <th>Intercept</th>                      <td>    0.0911</td> <td>    0.040</td> <td>    2.277</td> <td> 0.023</td> <td>    0.013</td> <td>    0.170</td>
 </tr>
 <tr>
-  <th>intervention_class</th>             <td>    0.0203</td> <td>    0.047</td> <td>    0.429</td> <td> 0.668</td> <td>   -0.073</td> <td>    0.113</td>
+  <th>intervention_class</th>             <td>   -0.1029</td> <td>    0.046</td> <td>   -2.239</td> <td> 0.025</td> <td>   -0.193</td> <td>   -0.013</td>
 </tr>
 <tr>
-  <th>post_period</th>                    <td>    0.0976</td> <td>    0.059</td> <td>    1.664</td> <td> 0.096</td> <td>   -0.017</td> <td>    0.213</td>
+  <th>post_period</th>                    <td>    0.0986</td> <td>    0.057</td> <td>    1.741</td> <td> 0.082</td> <td>   -0.012</td> <td>    0.210</td>
 </tr>
 <tr>
-  <th>intervention_class:post_period</th> <td>    0.0540</td> <td>    0.067</td> <td>    0.806</td> <td> 0.420</td> <td>   -0.077</td> <td>    0.185</td>
+  <th>intervention_class:post_period</th> <td>    0.0517</td> <td>    0.065</td> <td>    0.795</td> <td> 0.426</td> <td>   -0.076</td> <td>    0.179</td>
 </tr>
 </table><br/><br/>Notes:<br/>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 
@@ -580,16 +587,16 @@ fit.get_robustcov_results(
 <table class="simpletable">
 <caption>OLS Regression Results</caption>
 <tr>
-  <th>Dep. Variable:</th>     <td>score</td>  <th>  R-squared:         </th> <td>   0.005</td> 
+  <th>Dep. Variable:</th>     <td>score</td>  <th>  R-squared:         </th> <td>   0.006</td> 
 </tr>
 <tr>
   <th>Model:</th>              <td>OLS</td>   <th>  Adj. R-squared:    </th> <td>   0.005</td> 
 </tr>
 <tr>
-  <th>No. Observations:</th> <td>  4924</td>  <th>  F-statistic:       </th> <td>1.333e+04</td>
+  <th>No. Observations:</th> <td>  5034</td>  <th>  F-statistic:       </th> <td>1.057e+04</td>
 </tr>
 <tr>
-  <th>Covariance Type:</th>  <td>cluster</td> <th>  Prob (F-statistic):</th> <td>6.95e-129</td>
+  <th>Covariance Type:</th>  <td>cluster</td> <th>  Prob (F-statistic):</th> <td>6.46e-124</td>
 </tr>
 </table>
 <table class="simpletable">
@@ -597,16 +604,16 @@ fit.get_robustcov_results(
                  <td></td>                   <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
 </tr>
 <tr>
-  <th>Intercept</th>                      <td>   -0.0086</td> <td>    0.048</td> <td>   -0.179</td> <td> 0.859</td> <td>   -0.105</td> <td>    0.087</td>
+  <th>Intercept</th>                      <td>    0.0911</td> <td>    0.039</td> <td>    2.342</td> <td> 0.021</td> <td>    0.014</td> <td>    0.168</td>
 </tr>
 <tr>
-  <th>intervention_class</th>             <td>    0.0203</td> <td>    0.055</td> <td>    0.366</td> <td> 0.715</td> <td>   -0.090</td> <td>    0.130</td>
+  <th>intervention_class</th>             <td>   -0.1029</td> <td>    0.048</td> <td>   -2.131</td> <td> 0.036</td> <td>   -0.199</td> <td>   -0.007</td>
 </tr>
 <tr>
-  <th>post_period</th>                    <td>    0.0976</td> <td>    0.001</td> <td>   68.663</td> <td> 0.000</td> <td>    0.095</td> <td>    0.100</td>
+  <th>post_period</th>                    <td>    0.0986</td> <td>    0.001</td> <td>   82.473</td> <td> 0.000</td> <td>    0.096</td> <td>    0.101</td>
 </tr>
 <tr>
-  <th>intervention_class:post_period</th> <td>    0.0540</td> <td>    0.002</td> <td>   33.014</td> <td> 0.000</td> <td>    0.051</td> <td>    0.057</td>
+  <th>intervention_class:post_period</th> <td>    0.0517</td> <td>    0.002</td> <td>   33.734</td> <td> 0.000</td> <td>    0.049</td> <td>    0.055</td>
 </tr>
 </table><br/><br/>Notes:<br/>[1] Standard Errors are robust to cluster correlation (cluster)
 
@@ -616,14 +623,16 @@ As universal bootstrap is based on universal sampling, it is  straightforward to
 
 
 ```python
-hashes = mmhash(test_scores["class_id"].astype(np.int32).values)
-estimates = np.zeros(bootstrap_replications)
+edu_hashes = mmhash(
+    test_scores["class_id"].values.astype(np.int32)
+)
+edu_null = np.zeros(bootstrap_replications)
 
 for i, random in enumerate(
     np.vstack([test_randomization, control_randomization]).T
 ):
     test_random, control_random = np.multiply.outer(
-        hashes, random
+        edu_hashes, random
     ).T
     test_weights = poisson_sample_weight(
         test_random, test_percent_class
@@ -632,38 +641,38 @@ for i, random in enumerate(
         control_random, 1 - test_percent_class
     )
 
-    df = pd.concat(
-        [
-            test_scores.assign(
-                test=1, weight=test_weights
-            ).query("weight > 0"),
-            test_scores.assign(
-                test=0, weight=control_weights
-            ).query("weight > 0"),
-        ]
-    ).eval("test_post = test * post_period")
+    df = (
+        pd.concat(
+            [
+                test_scores.assign(test=1, weight=test_weights),
+                test_scores.assign(
+                    test=0, weight=control_weights
+                ),
+            ]
+        )
+        .query("weight > 0")
+        .eval("test_post = test * post_period")
+    )
 
     ols = LinearRegression().fit(
         df[["test", "post_period", "test_post"]], df["score"]
     )
-    estimates[i] = ols.coef_[-1]
+    edu_null[i] = ols.coef_[-1]
+
+edu_point_est = fit.params["intervention_class:post_period"]
 
 fig, ax = plt.subplots()
-ax.hist(estimates)
-ax.axvline(
-    fit.params["intervention_class:post_period"],
-    color="red",
-    ls="--",
-)
+ax.hist(edu_null)
+ax.axvline(edu_point_est, color="red", ls="--")
 ax.set_title(
-    "Clustered universal boostrap: null distribution vs. point"
+    "Clustered universal bootstrap: null distribution vs. point"
     " estimate"
 );
 ```
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_27_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_29_0.png)
     
 
 
