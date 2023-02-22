@@ -113,7 +113,7 @@ with_hash_columns AS (
         (__bits << 0)::BIT(32)::INT  AS __hash0,
         (__bits << 32)::BIT(32)::INT AS __hash1,
         (__bits << 64)::BIT(32)::INT AS __hash2,
-        (__bits << 64)::BIT(32)::INT AS __hash3
+        (__bits << 96)::BIT(32)::INT AS __hash3
     FROM
         md5_bits
 ),

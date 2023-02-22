@@ -3,3 +3,4 @@
 .jekyll-cache/
 **/.ipynb_checkpoints/
 _site/
+notebooks/data/
