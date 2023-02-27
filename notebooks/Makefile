@@ -1,3 +1,6 @@
+colima:
+	colima start --cpu 4 --memory 6
+
 build:
 	docker build --rm -t myjupyter .
 
