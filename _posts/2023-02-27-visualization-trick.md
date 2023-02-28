@@ -2,12 +2,12 @@
 layout: post
 author: "Patrick Nicholson"
 title: "A visualization trick obvious in hindsight"
-excerpt: "Data visualization is a key part of every data science and machine learning project. Visualizing these data can be difficult; we usually have more points to draw than space on screen. Most of us realize pretty quickly that we can summarize data for certain visualizations, the most common being the histogram. What took me an embarassingly long time to realize is that scatterplots can be easily handled by its generalization: the <i>nd</i>-histogram."
+excerpt: "Data visualization is a key part of every data science and machine learning project. It can be difficult given that we usually have more points to draw than space on screen. Most of us realize pretty quickly that we can summarize data for certain visualizations, the most common being the histogram. What took me an embarrassingly long time to realize is that scatterplots can be easily handled by its generalization: the <i>nd</i>-histogram."
 image:
     path: /notebooks/visualization-trick_files/visualization-trick_9_0.png
 ---
 
-Data visualization is a key part of every data science and machine learning project. Visualizing these data can be difficult; we usually have more points to draw than space on screen. Most of us realize pretty quickly that we can summarize data for certain visualizations, the most common being the histogram. What took me an embarassingly long time to realize is that scatterplots can be easily handled by its generalization: the $nd$-histogram.
+Data visualization is a key part of every data science and machine learning project. It can be difficult given that we usually have more points to draw than space on screen. Most of us realize pretty quickly that we can summarize data for certain visualizations, the most common being the histogram. What took me an embarrassingly long time to realize is that scatterplots can be easily handled by its generalization: the $nd$-histogram.
 
 Note: The [Datashader project](https://datashader.org/user_guide/Plotting_Pitfalls.html) has a good discussion of issues that worsen as data size increases.
 
