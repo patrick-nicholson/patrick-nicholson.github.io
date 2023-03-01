@@ -425,7 +425,7 @@ l.merge(r, how="outer", indicator=True).groupby("_merge").count()
 
 
 
-The kinds of problems can be addressed with universal random sampling. For a hash function $f_{[a,b)}$ producing hash values $h_i \in \left[a, b \right)$ and sample rate $r$, we transform the rate to a ceiling value such that we keep $h_i < \left( a + r * (b - a) \right)$.
+The kinds of problems can be addressed with universal sampling. For a hash function $f_{[a,b)}$ producing hash values $h_i \in \left[a, b \right)$ and sample rate $r$, we transform the rate to a ceiling value such that we keep $h_i < \left( a + r * (b - a) \right)$.
 
 We can still do independent sampling based on a value that's unique to a row (here just the row number).
 
