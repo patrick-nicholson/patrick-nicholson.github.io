@@ -3,8 +3,8 @@ layout: post
 author: "Patrick Nicholson"
 title: "Universal sampling: better sampling for a better tomorrow"
 excerpt: "Universal hash functions efficiently and deterministically map arbitrary input to uniformly distributed integers. In this post, I demonstrate how to leverage these functions for sampling from datasets and distributions."
-image: 
-    path: /notebooks/universal-sampling_files/universal-sampling_37_0.png
+image:
+    path: /notebooks/universal-sampling_files/universal-sampling_38_0.png
 ---
 
 [Universal hashing](https://en.wikipedia.org/wiki/Universal_hashing) is a powerful primitive for statistical analysis at scale. Universal hash functions efficiently and deterministically map inputs to integers that are uniformly distributed within the binary range of an integer type (e.g., a 64-bit long).
@@ -32,7 +32,7 @@ import pandas as pd
 
 from pyspark.sql import SparkSession
 from scipy import stats
-from sklearn.utils.murmurhash import murmurhash3_32 as mmhash
+from sklearn.utils.murmurhash import murmurhash3_32
 from typing import Union
 from uuid import uuid4
 
@@ -42,9 +42,31 @@ spark = SparkSession.builder.getOrCreate()
 %matplotlib inline
 ```
 
+
+```python
+INT_MIN = np.int32(-(2**31))
+INT_MAX = np.int32(2**31 - 1)
+INT_RANGE = np.int64(2**32)
+
+_mmhash_ufunc = np.frompyfunc(murmurhash3_32, nin=1, nout=1)
+
+
+def mmhash(values):
+    """Wrapper for sklearn's MurmurHash that accepts most types"""
+    if np.ndim(values):
+        if np.issubdtype(values.dtype, np.int32):
+            return murmurhash3_32(values)
+        return _mmhash_ufunc(values.astype(np.bytes_)).astype(
+            np.int32
+        )
+    if isinstance(values, (bytes, str, np.int32)):
+        return murmurhash3_32(values)
+    return _mmhash_ufunc(np.array(values, dtype=np.bytes_))
+```
+
 ## Hashing
 
-Let's take a look at universal hashing in Python with `scikit-learn`'s MurmurHash implementation. For example inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$. 
+Let's take a look at universal hashing in Python with `scikit-learn`'s MurmurHash implementation. For exmaple inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$. 
 
 
 ```python
@@ -57,7 +79,7 @@ assert len(set(integers)) == n
 assert len(set(normals)) == n
 
 integer_hashes = mmhash(integers)
-normal_hashes = np.array([mmhash(bytes(_)) for _ in normals])
+normal_hashes = mmhash(normals)
 
 assert len(set(integer_hashes)) == n
 assert len(set(normal_hashes)) == n
@@ -80,7 +102,7 @@ fig.tight_layout();
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_3_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_4_0.png)
     
 
 
@@ -125,7 +147,7 @@ ax.set_title("Active bits per hash");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_7_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_8_0.png)
     
 
 
@@ -151,7 +173,7 @@ ax.set_title("Distribution of truncated MD5 hashes");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_10_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_11_0.png)
     
 
 
@@ -218,34 +240,34 @@ df.sample(frac=sample_rate).head()
   </thead>
   <tbody>
     <tr>
-      <th>36567</th>
-      <td>7518998</td>
-      <td>2</td>
-      <td>0.461506</td>
-    </tr>
-    <tr>
-      <th>39643</th>
-      <td>7893362</td>
-      <td>2</td>
-      <td>2.028855</td>
-    </tr>
-    <tr>
-      <th>11258</th>
-      <td>5041735</td>
-      <td>4</td>
-      <td>2.508135</td>
-    </tr>
-    <tr>
-      <th>40162</th>
-      <td>9197996</td>
+      <th>26877</th>
+      <td>1294096</td>
       <td>3</td>
-      <td>0.774906</td>
+      <td>-0.121722</td>
     </tr>
     <tr>
-      <th>25381</th>
-      <td>2801474</td>
+      <th>5793</th>
+      <td>9561491</td>
       <td>1</td>
-      <td>-0.019752</td>
+      <td>-0.132633</td>
+    </tr>
+    <tr>
+      <th>18607</th>
+      <td>3302639</td>
+      <td>0</td>
+      <td>2.134427</td>
+    </tr>
+    <tr>
+      <th>11186</th>
+      <td>4726394</td>
+      <td>0</td>
+      <td>1.013974</td>
+    </tr>
+    <tr>
+      <th>16286</th>
+      <td>5668122</td>
+      <td>3</td>
+      <td>-1.567267</td>
     </tr>
   </tbody>
 </table>
@@ -269,7 +291,7 @@ sample0.equals(sample1)
 
 
 
-More general forms of random sampling are usually inconvenient. For example, sampling users and keeping their associated activity requires de-duplicating the users, sampling from the user set, and filtering the original data.
+More general forms of random sampling are usually incovenient. For example, sampling half of our users requires deduplicating the users and sampling from that set, then filtering the original data.
 
 
 ```python
@@ -311,33 +333,33 @@ More general forms of random sampling are usually inconvenient. For example, sam
   <tbody>
     <tr>
       <th>0</th>
-      <td>2544945</td>
+      <td>3594621</td>
       <td>0</td>
-      <td>-1.386094</td>
+      <td>0.318478</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>2544945</td>
+      <td>3594621</td>
       <td>1</td>
-      <td>-0.826280</td>
+      <td>-1.685237</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>4614674</td>
-      <td>0</td>
-      <td>-0.039053</td>
+      <td>3594621</td>
+      <td>2</td>
+      <td>-0.479954</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>4614674</td>
-      <td>1</td>
-      <td>0.494212</td>
+      <td>3594621</td>
+      <td>3</td>
+      <td>0.502334</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>4614674</td>
-      <td>2</td>
-      <td>-1.564690</td>
+      <td>3594621</td>
+      <td>4</td>
+      <td>-0.817127</td>
     </tr>
   </tbody>
 </table>
@@ -431,7 +453,7 @@ We can still do independent sampling based on a value that's unique to a row (he
 
 
 ```python
-sample_ceiling = -(2**31) + int(sample_rate * 2**32)
+sample_ceiling = INT_MIN + int(sample_rate * INT_RANGE)
 df[df.index.map(mmhash) < sample_ceiling].head()
 ```
 
@@ -463,34 +485,34 @@ df[df.index.map(mmhash) < sample_ceiling].head()
   </thead>
   <tbody>
     <tr>
-      <th>8</th>
-      <td>4521687</td>
-      <td>3</td>
-      <td>-0.996978</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>1300649</td>
-      <td>4</td>
-      <td>0.413620</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>2371857</td>
-      <td>6</td>
-      <td>-1.756637</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>5790595</td>
-      <td>0</td>
-      <td>-0.702292</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>5790595</td>
+      <th>1</th>
+      <td>4458669</td>
       <td>1</td>
-      <td>0.552699</td>
+      <td>-0.108092</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>4521687</td>
+      <td>5</td>
+      <td>-0.744671</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>4521687</td>
+      <td>6</td>
+      <td>-0.644479</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>9627518</td>
+      <td>2</td>
+      <td>0.377447</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>7517891</td>
+      <td>0</td>
+      <td>-0.723131</td>
     </tr>
   </tbody>
 </table>
@@ -502,9 +524,7 @@ Sampling all data for a subset of users is as simple as changing the input to th
 
 
 ```python
-df[
-    df["user_id"].astype(np.bytes_).map(mmhash) < sample_ceiling
-].head()
+df[mmhash(df["user_id"]) < sample_ceiling].head()
 ```
 
 
@@ -579,14 +599,8 @@ batch0 = users.iloc[:1000]
 batch1 = users.iloc[500:1500]
 overlap = users.iloc[500:1000]
 
-l = batch0[
-    batch0["user_id"].astype(np.bytes_).map(mmhash)
-    < sample_ceiling
-]
-r = batch1[
-    batch1["user_id"].astype(np.bytes_).map(mmhash)
-    < sample_ceiling
-]
+l = batch0[mmhash(batch0["user_id"]) < sample_ceiling]
+r = batch1[mmhash(batch1["user_id"]) < sample_ceiling]
 l.merge(r, how="outer", indicator=True).merge(overlap).groupby(
     "_merge"
 ).count()
@@ -694,7 +708,7 @@ def randomize_hashes(hashes, k, random_seed):
     hashes = hashes.astype(np.int32)
     random_state = np.random.RandomState(random_seed)
     random_integers = random_state.randint(
-        -(2**31), 2**31, k, np.int32
+        INT_MIN, INT_MAX, k, np.int32
     )
     return np.multiply.outer(hashes, random_integers)
 
@@ -735,14 +749,11 @@ Mapping the hash value to arbitrary discrete and continuous uniform distribution
 n = 10**6
 
 # distinct hashes for those distinct values
-hashes = np.array(
-    [mmhash(bytes(_), positive=True) for _ in normals],
-    dtype=np.int32,
-)
+hashes = mmhash(normals)
 
 # approximate a normal from the hashes
 irwin_hall_approx = (
-    randomize_hashes(hashes, k=12, random_seed=73529) / 2**32
+    randomize_hashes(hashes, k=12, random_seed=73529) / INT_RANGE
 ).sum(axis=1)
 
 
@@ -750,18 +761,22 @@ irwin_hall_approx = (
 
 fig, ax = plt.subplots(2, 2, sharex=True)
 
+bins = np.histogram_bin_edges(
+    np.r_[normals, irwin_hall_approx], bins=30
+)
+
 ax[0, 0].set_title("Random normal")
-ax[0, 0].hist(normals, bins=30)
+ax[0, 0].hist(normals, bins=bins)
 
 ax[1, 1].set_title("Irwin-Hall approximation")
-ax[1, 1].hist(irwin_hall_approx, bins=30)
+ax[1, 1].hist(irwin_hall_approx, bins=bins)
 
 ax[0, 0].sharex(ax[1, 0])
 ax[0, 0].sharey(ax[1, 1])
 
 ax[1, 0].set_title("Joint distribution")
 ax[1, 0].hist2d(
-    normals, irwin_hall_approx, bins=30, cmap="inferno"
+    normals, irwin_hall_approx, bins=bins, cmap="inferno"
 )
 
 fig.delaxes(ax[0, 1])
@@ -770,7 +785,7 @@ plt.tight_layout();
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_37_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_38_0.png)
     
 
 
@@ -778,7 +793,7 @@ As long as an evaluation uses the same random integers for permutation, this ope
 
 More exact samples can be generated by converting the hashes to continuous uniform samples (discussed above), including the non-iterative [Box-Muller transform](https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform).
 
-More approximate samples can be generated with inverse transform sampling, demonstrated below.
+More approximate samples can be generated with inverse transform sampling, which we used below for Poisson sampling.
 
 ### Universal sampling from the Poisson distribution
 
@@ -795,7 +810,7 @@ def poisson_sampling(hashes, lam, tol=1e-12):
     lower, upper = np.ceil(pois.isf([1 - tol, tol]))
 
     edges = (
-        pois.cdf(np.arange(lower, upper)) * 2**32 - 2**31
+        pois.cdf(np.arange(lower, upper)) * INT_RANGE + INT_MIN
     ).astype(np.int32)
 
     poisson = pois.rvs(
@@ -827,7 +842,7 @@ poisson_sampling(integer_hashes, 2)
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_40_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_41_0.png)
     
 
 
@@ -840,26 +855,43 @@ poisson_sampling(integer_hashes, 10000)
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_42_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_43_0.png)
     
 
 
 ## Universal sampling from arbitrary distributions via approximate inverse transformation
 
-Every distribution will have a best method for generating random values from universal hash seeds. However, in practice these won't always be tractable or even possible (e.g., infrastructure constraints).
+Every distribution will have a best method for generating random values from universal hash seeds. In practice, these won't always be tractable or even possible (e.g., infrastructure constraints).
 
 Inverse transformation provides a general method of approximation in these cases. The approach is simple:
 1. Evenly divide the (0, 1) interval 
 2. Calculate the quantile at each value in the interval
 3. Integerize the interval to the hash range 
 4. Use the insertion position of hash values into the interval array to choose the quantile, breaking ties by choosing the quantile closest to the median
+5. If continuous, use a second hash function to interpolate within the quantile
 
 The precision of the approximation is controlled by the size of the lookup table we're willing to create. 
 
 
 ```python
+stats.rv_continuous
+```
+
+
+
+
+    scipy.stats._distn_infrastructure.rv_continuous
+
+
+
+
+```python
 def inverse_approximation(
-    hashes, distribution, tol=1e-12, table_size=1000
+    hashes,
+    distribution,
+    tol=1e-12,
+    table_size=1000,
+    randomize=-860787389,
 ):
     # cdf is full linear space in the tolerance range
     cdf = np.linspace(tol, 1 - tol, table_size)
@@ -869,11 +901,8 @@ def inverse_approximation(
 
     # edges are the integerized cdf
     # padded with the extrema to match size of values
-    edges = np.r_[
-        np.int32(-(2**31)),
-        (cdf * 2**32 - 2**31).astype(np.int32),
-        np.int32(2**31 - 1),
-    ]
+    unpadded = (cdf * INT_RANGE + INT_MIN).astype(np.int32)
+    edges = np.r_[INT_MIN, unpadded, INT_MAX]
 
     # get index in edges for the hashes
     # choose the side closer to the center
@@ -887,15 +916,21 @@ def inverse_approximation(
         size=len(hashes), random_state=random_state
     )
     inverse_samples = values[index]
+    if isinstance(distribution, stats.rv_continuous):
+        between_values = values[
+            np.where(hashes < 0, index + 1, index - 1)
+        ]
+        min_ = np.minimum(inverse_samples, between_values)
+        max_ = np.maximum(inverse_samples, between_values)
+        interp = hashes * randomize / INT_RANGE + 0.5
+        inverse_samples += (max_ - min_) * interp
 
     fig, ax = plt.subplots()
     num_bins = 30
-    if all(samples == np.floor(samples)):
-        sample_range = max(
-            samples.max() - samples.min(),
-            inverse_samples.max() - inverse_samples.min(),
-        )
-        num_bins = min(30, int(sample_range))
+    if isinstance(distribution, stats.rv_discrete):
+        _ = np.r_[samples, inverse_samples]
+        sample_range = _.max() - _.min()
+        num_bins = min(30, sample_range)
 
     _, bins, _ = ax.hist(
         samples, bins=num_bins, label="SciPy samples", alpha=0.5
@@ -920,7 +955,7 @@ ax.set_title("Approximate samples from Pois($10^6$)");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_45_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_47_0.png)
     
 
 
@@ -932,7 +967,7 @@ ax.set_title("Approximate samples from N(10, 10)");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_46_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_48_0.png)
     
 
 
@@ -944,7 +979,7 @@ ax.set_title("Approximate samples from $\Gamma(1, 2)$");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_47_0.png)
+![png](/notebooks/universal-sampling_files/universal-sampling_49_0.png)
     
 
 

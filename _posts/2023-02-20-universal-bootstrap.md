@@ -4,7 +4,7 @@ author: "Patrick Nicholson"
 title: "Universal bootstrap: a superpower"
 excerpt: "Bootstrapping is commonly used in computational statistics and machine learning for uncertainty quantification, hypothesis testing, and ensembling. By combining universal sampling with Poisson bootstrap, I show how the universal bootstrap unlocks incredibly sophisticated analysis at any scale in any tool."
 image:
-    path: /notebooks/universal-bootstrap_files/universal-bootstrap_27_0.png
+    path: /notebooks/universal-bootstrap_files/universal-bootstrap_30_0.png
 ---
 
 > _Look on my computational methods, ye theorists, and despair_
@@ -27,7 +27,7 @@ from IPython.display import Markdown
 from scipy import stats
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LinearRegression
-from sklearn.utils.murmurhash import murmurhash3_32 as mmhash
+from sklearn.utils.murmurhash import murmurhash3_32
 from uuid import uuid4
 
 %matplotlib inline
@@ -35,11 +35,33 @@ from uuid import uuid4
 random_state = np.random.RandomState(12345)
 ```
 
+
+```python
+INT_MIN = np.int32(-(2**31))
+INT_MAX = np.int32(2**31 - 1)
+INT_RANGE = np.int64(2**32)
+
+_mmhash_ufunc = np.frompyfunc(murmurhash3_32, nin=1, nout=1)
+
+
+def mmhash(values):
+    """Wrapper for sklearn's MurmurHash that accepts most types"""
+    if np.ndim(values):
+        if np.issubdtype(values.dtype, np.int32):
+            return murmurhash3_32(values)
+        return _mmhash_ufunc(values.astype(np.bytes_)).astype(
+            np.int32
+        )
+    if isinstance(values, (bytes, str, np.int32)):
+        return murmurhash3_32(values)
+    return _mmhash_ufunc(np.array(values, dtype=np.bytes_))
+```
+
 ## Key insight
 
 Bootstrapping is based on sampling with replacement. [Poisson sampling](https://en.wikipedia.org/wiki/Poisson_sampling) is one such method. For a sample size $N$ and resampling size $S$, the resampling weights for each observation follows the $\text{Pois} \left( \frac{S}{N} \right)$ distribution. The [Poisson bootstrap](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Poisson_bootstrap), commonly used for bootstrapping streams and large datasets, is the particular case where $N = S$, i.e., $\text{Pois}(1)$.
 
-In [my earlier post](/2023/02/13/universal-sampling/), I demonstrated a method of sampling from a Poisson distribution based on universal hash functions. Composing this with Poisson sampling gives us the universal bootstrap.
+In [my earlier post](https://patrick-nicholson.github.io/2023/02/13/universal-sampling/), I demonstrated a method of sampling from a Poisson distribution based on universal hash functions. Composing this with Poisson sampling gives us the universal bootstrap.
 
 In short:
 * A universal hash function deterministically maps an input to a uniformly distributed integer in the full integer range
@@ -75,7 +97,7 @@ def poisson_thresholds(lam, tol=None):
 
 
 def inverse_transform_search(thresholds, hash_values):
-    """Inverse transform search with correction to thin out tails 
+    """Inverse transform search with correction to thin out tails
     when there are duplicated thresholds
     """
     left = np.searchsorted(thresholds, hash_values, side="left")
@@ -205,7 +227,7 @@ iris["sepal_length"].sample(frac=1.0, replace=True).mean()
 
 
 
-    5.8580000000000005
+    5.796666666666667
 
 
 
@@ -232,7 +254,7 @@ ax.set_title("Bootstrap distribution of a sample statistic");
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_11_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_12_0.png)
     
 
 
@@ -240,7 +262,7 @@ A single universal bootstrap estimate is the sample statistic weighted by Poisso
 
 
 ```python
-baby_hashes = mmhash(iris.index.values.astype(np.int32))
+baby_hashes = mmhash(iris.index.values)
 np.average(
     iris["sepal_length"],
     weights=poisson_sample_weight(baby_hashes, 1),
@@ -250,14 +272,14 @@ np.average(
 
 
 
-    5.938410596026489
+    5.844594594594595
 
 
 
 
 ```python
 randomization = random_state.randint(
-    -(2**31), 2**31, bootstrap_replications, dtype=np.int32
+    INT_MIN, INT_MAX, bootstrap_replications, dtype=np.int32
 )
 baby_weights = poisson_sample_weight(
     np.multiply.outer(baby_hashes, randomization), 1
@@ -276,7 +298,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_14_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_15_0.png)
     
 
 
@@ -312,7 +334,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_16_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_17_0.png)
     
 
 
@@ -380,7 +402,7 @@ The universal bootstrap is changed only slightly: we now generate test and contr
 
 ```python
 test_randomization, control_randomization = random_state.randint(
-    -(2**31), 2**31, (2, bootstrap_replications), np.int32
+    INT_MIN, INT_MAX, (2, bootstrap_replications), np.int32
 )
 ```
 
@@ -388,11 +410,7 @@ The test is then comparing the null distribution to the observed statistic from 
 
 
 ```python
-offer_hashes = (
-    purchases["customer_uuid"]
-    .map(mmhash)
-    .values.astype(np.int32)
-)
+offer_hashes = mmhash(purchases["customer_uuid"].values)
 
 test_weights = poisson_sample_weight(
     np.multiply.outer(offer_hashes, test_randomization),
@@ -430,7 +448,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_22_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_23_0.png)
     
 
 
@@ -466,8 +484,7 @@ true_effect_intervention = 0.05
 # - class_id: unique class identifier
 # - student_num: anonymous student number within class
 # - intervention_class: class received intervention (binary)
-# - post_period: score is for the second test (post intervention, 
-#                if received)
+# - post_period: score is for the second test (post intervention, if received)
 # - score: standardized test score
 test_scores = pd.DataFrame(
     [
@@ -623,9 +640,7 @@ As universal bootstrap is based on universal sampling, it is  straightforward to
 
 
 ```python
-edu_hashes = mmhash(
-    test_scores["class_id"].values.astype(np.int32)
-)
+edu_hashes = mmhash(test_scores["class_id"].values)
 edu_null = np.zeros(bootstrap_replications)
 
 for i, random in enumerate(
@@ -672,7 +687,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_29_0.png)
+![png](/notebooks/universal-bootstrap_files/universal-bootstrap_30_0.png)
     
 
 

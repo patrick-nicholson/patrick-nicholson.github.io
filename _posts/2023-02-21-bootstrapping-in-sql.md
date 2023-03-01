@@ -9,7 +9,7 @@ image:
 
 ![jpg](/notebooks/palpatine-bootstrap.jpg)
 
-Bootstrapping has so many useful properties that I often want to apply it everywhere. In my [previous post](/2023/02/20/universal-bootstrap/), I covered the universal bootstrap, a method that combines universal hash functions and the Poisson bootstrap. While I feel that it has strong benefits even in local-analysis tools like Python, it certainly is not the required way to do bootstrapping, so readers may not have immediately grasped its generalization.
+bootstrapping has so many useful properties that I often want to apply it everywhere. In my [previous post](/2023/02/20/universal-bootstrap/), I covered the universal bootstrap, a method that combines universal hash functions and the Poisson bootstrap. While I feel that it has strong benefits even in local-analysis tools like Python, it certainly is not the required way to do bootstrapping, so readers may not have immediately grasped its generalization.
 
 Many common tools built specifically for data science/engineering often have language APIs (e.g., Spark and Flink). In such cases, the bootstrapping methods discussed in that post can be relatively easily adapted to those APIs for an idiomatic and efficient approach. However, not all tools are like this (looking at you Snowflake), and we're not always asked or able to do analyses in them anyway.
 
@@ -65,6 +65,7 @@ Postgres does not have a fast, non-cryptographic hash function by default. There
 
 ```sql
 
+
 CREATE TYPE hash AS
 (
     __hash_index INT,
@@ -119,29 +120,25 @@ with_hash_columns AS (
 ),
 
 -- flatten the four columns into rows
-
--- intermediate step to index the hashes [0, 3]
--- (nested arrays wouldn't work)
-rows_ugly AS (
+rows AS (
     SELECT
         UNNEST(ARRAY [
-            __hash0::BIGINT << 2,
-            (__hash1::BIGINT << 2) | 1,
-            (__hash2::BIGINT << 2) | 2,
-            (__hash3::BIGINT << 2) | 3
-            ]) AS __hash_with_index_bits
+            ROW(0, __hash0)::hash,
+            ROW(1, __hash1)::hash,
+            ROW(2, __hash2)::hash,
+            ROW(3, __hash3)::hash
+            ]) AS __hash
     FROM
         with_hash_columns
 )
 
 -- back to the correct format
 SELECT
-    (__hash_with_index_bits & 3)::INT  AS __hash_index,
-    (__hash_with_index_bits >> 2)::INT AS __hash_value
+    (__hash).*
 FROM
-    rows_ugly
+    rows
 WHERE
-    (__hash_with_index_bits & 3) < hashes
+    (__hash).__hash_index < hashes
     ;
 $$ LANGUAGE sql;
 
@@ -188,7 +185,7 @@ WITH
     random AS (
         SELECT
             __random_index,
-            FLOOR(RANDOM() * 4294967295 - 2147483648)::INT 
+            FLOOR(RANDOM() * 4294967296 + -2147483648)::INT 
                 AS __random_value
         FROM
             GENERATE_SERIES(0, num - 1) __random_index
@@ -200,6 +197,16 @@ FROM
     random
 ;
 $$ LANGUAGE sql;
+
+
+
+CREATE FUNCTION __bigint_to_int(value BIGINT)
+    RETURNS INT
+AS
+$$
+SELECT (((value % 4294967296) + 4294967296) 
+    % 4294967296)::BIT(32)::INT;
+$$ LANGUAGE SQL;
 
 
 /**
@@ -226,8 +233,8 @@ AS
 $$
 SELECT
     ((rix).__random_index << 2) | __hash_index AS __hash_index,
-    ((((__hash_value::BIGINT * (rix).__random_value) % 4294967295) 
-        + 4294967295) % 4294967295)::BIT(32)::INT AS __hash_value
+    __bigint_to_int(__hash_value::BIGINT * (rix).__random_value) 
+        AS __hash_value
 FROM
     generate_hashes(val, hashes) AS h,
     ( select unnest(random_integers)::random_integer as rix ) r
@@ -284,7 +291,7 @@ WITH
     ),
     rights AS (
         SELECT 
-            FLOOR(s * 4294967295 - 2147483648) AS upper, 
+            FLOOR(s * 4294967296 + -2147483648) AS upper, 
             x AS value
         FROM quantiles
     ),
@@ -309,8 +316,8 @@ WITH
     ),
     lowers AS (
         SELECT
-            COALESCE(LAG(upper) OVER (ORDER BY value) + 1,
-               -2147483648) AS lower,
+            COALESCE(LAG(upper) OVER (ORDER BY value) + 1, 
+                -2147483648) AS lower,
             upper,
             value
         FROM
@@ -365,8 +372,8 @@ CREATE TYPE bootstrap_configuration AS
     The random number generator seed
  */
 CREATE FUNCTION configure_bootstrap(
-    group_fractions DOUBLE PRECISION[],
-    replications INT, seed DOUBLE PRECISION)
+    group_fractions DOUBLE PRECISION[], replications INT, 
+    seed DOUBLE PRECISION)
     RETURNS bootstrap_configuration
 AS
 $$
@@ -468,12 +475,12 @@ FROM
     generate_randomized_hashes(val, (config).__num_hashes, 
         (config).__random_integers),
     ( SELECT UNNEST((config.__groups))::group_configuration AS grp ) 
-        groups, 
+        AS groups, 
     LATERAL GENERATE_SERIES(1, (grp).__poisson_value)
 WHERE
     __hash_index % (config).__num_groups = (grp).__group_index
-    AND __hash_value BETWEEN (grp).__poisson_lower 
-        AND (grp).__poisson_upper
+    AND (grp).__poisson_lower <= __hash_value 
+    AND __hash_value <= (grp).__poisson_upper
 ;
 $$ LANGUAGE sql;
 
@@ -484,6 +491,8 @@ $$ LANGUAGE sql;
 The `poisson_bootstrap` is called as a `LATERAL` expression in a query, producing and average of (number of groups) $\times$ (number of replications) $\times$ (average of sample fractions) output rows for each input row, with `__replication_index` and `__group_index` columns providing the necessary identification.
 
 Baby, let's bootstrap. It's simply an aggregation including the necessary bootstrap columns in the grouping.
+
+
 
 
 ```sql
@@ -545,6 +554,7 @@ Yes, you can even do this in SQL. Since difference-in-differences has a simple a
 
 
 
+
 ```sql
 
 with 
@@ -597,14 +607,16 @@ from
 ```python
 fig, ax = plt.subplots(nrows=2, sharex=True)
 
-ax[0].hist(edu["estimate"])
+bins = np.histogram_bin_edges(np.r_[edu_point_est, edu_null], 15)
+
+ax[0].hist(edu["estimate"], bins=bins)
 ax[0].axvline(edu_point_est, color="red", ls="--")
 ax[0].set_title(
     "SQL bootstrap clustered null distribution vs. point"
     " estimate"
 )
 
-ax[1].hist(edu_null)
+ax[1].hist(edu_null, bins=bins)
 ax[1].set_title(
     "Reference Poisson bootstrap null distribution from previous"
     " post"
@@ -621,4 +633,4 @@ fig.tight_layout();
 
 ## Wrapping up
 
-You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins hate me.
+You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins feel it.
