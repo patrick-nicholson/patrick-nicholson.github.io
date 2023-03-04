@@ -62,13 +62,13 @@ The key to using an $nd$-histogram to replace a scatter plot is to use an approp
 
 ```python
 bins = 600
+widths = (ranges["max"] - ranges["min"]) / bins
 
-scaled = (df[cols] - ranges["min"]) / (
-    ranges["max"] - ranges["min"]
-)
-quantized = np.floor(scaled * bins) * (
-    ranges["max"] - ranges["min"]
-)
+quantized = (
+    np.minimum((df[cols] - ranges["min"]) // widths, bins - 1)
+    + 0.5
+) * widths
+
 points = (
     quantized.groupby(cols)
     .size()
@@ -83,7 +83,7 @@ len(points)
 
 
 
-    100564
+    100539
 
 
 
@@ -111,7 +111,7 @@ ax.set(
 
 
     
-![png](/notebooks/visualization-trick_files/visualization-trick_9_0.png)
+![png](visualization-trick_files/visualization-trick_9_0.png)
     
 
 
