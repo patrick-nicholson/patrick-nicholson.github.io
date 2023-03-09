@@ -26,3 +26,4 @@ exclude:
   - "**/docker-compose.yaml"
   - "**/TODO"
   - "**/TODO.*"
+  - "notebooks/graveyard/"

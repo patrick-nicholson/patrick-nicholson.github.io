@@ -4,14 +4,19 @@ colima:
 build:
 	docker build --rm -t myjupyter .
 
-jupyter: build
+jupyter: colima build
 	docker run -it --rm -p 8888:8888 -v "${PWD}":/home/jovyan/work myjupyter
 
-ray: build
+ray: colima build
 	docker run -it --shm-size=4gb --rm -p 8888:8888 -v "${PWD}":/home/jovyan/work myjupyter
 
-postgres: build
+postgres: colima build
 	docker-compose up
 
-down:
+down: colima
 	docker-compose down
+	docker volume prune -f
+	docker network prune -f
+
+stop: colima down
+	colima stop

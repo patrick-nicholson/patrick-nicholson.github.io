@@ -39,7 +39,7 @@ n = len(df)
 
 The process is generalizable from 1 to $n$ columns. In this case, I want to the two-dimensional scatterplot of $x$ and $y$ (longitude and latitude) pickup points. 
 
-Traditional $nd$-histograms require the ranges of inputs to properly quantized data. I do not know these _a priori_, so I must calculate them from the data.
+Traditional $nd$-histograms require the ranges of inputs to properly quantize data. I do not know these _a priori_, so I must calculate them from the data.
 
 
 ```python
@@ -111,7 +111,7 @@ ax.set(
 
 
     
-![png](visualization-trick_files/visualization-trick_9_0.png)
+![png](/notebooks/visualization-trick_files/visualization-trick_9_0.png)
     
 
 
