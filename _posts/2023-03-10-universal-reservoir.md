@@ -3,7 +3,7 @@ layout: post
 author: "Patrick Nicholson"
 title: "Universal reservoir: sampling a fixed number of elements from unbounded data"
 excerpt: "Reservoir sampling is the process of sampling a fixed number of elements from unbounded data. Universal hash functions provide an efficient, deterministic, and infinitely scalable approach to the reservoir that is easy to implement in any data environment."
-notebook: 
+notebook:
     path: /notebooks/universal-reservoir.ipynb
 image:
     path: /notebooks/universal-reservoir_files/universal-reservoir_15_0.png
@@ -15,7 +15,7 @@ But what if you don't know the size of your set? Or it's so large that getting a
 
 The concept of drawing a fixed number of elements from unbounded data is known as [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling). Reservoir techniques provide statistically sound random samples in a single pass with no requirement of _a priori_ knowledge of the size of a sample.
 
-In [an earlier post](/2023/02/13/universal-sampling/), I covered universal sampling: the use of a universal hash function to make decisions about which elements to choose. In this post, I will cover the universal reservoir: filling a reservoir based on universal sampling.
+In [an earlier post](/2023/02/13/universal-sampling/), I covered universal sampling: the use of a universal hash function to make decisions about which elements to choose. In this post, I will cover the universal reservoir: the use of a universal hash function to create a universal sampling procedure.
 
 
 ```python
@@ -142,7 +142,6 @@ class HashReservoir:
 
     def __init__(self, sample_size: int):
         self.sample_size = sample_size
-        self.truncated = False
         self.hashes = (
             np.zeros(self.sample_size, dtype=np.int32) + INT_MAX
         )
@@ -155,9 +154,6 @@ class HashReservoir:
         insertion_points = np.searchsorted(
             self.hashes, new_hashes
         )
-        self.truncated |= self.sample_size < (
-            np.sum(self.hashes < INT_MAX) + new_hashes.shape[0]
-        )
         self.hashes[:] = np.insert(
             self.hashes, insertion_points, new_hashes
         )[: self.sample_size]
@@ -165,14 +161,11 @@ class HashReservoir:
 
     @property
     def kth_hash(self):
-        if self.truncated:
-            return self.hashes[-1]
-        return INT_MAX
+        return self.hashes[-1]
 
     def __repr__(self):
         return (
             f"HashReservoir(sample_size={self.sample_size},"
-            f" truncated={self.truncated},"
             f" kth_hash={self.kth_hash})"
         )
 ```
@@ -204,7 +197,7 @@ hash_reservoir
 
 
 
-    HashReservoir(sample_size=4096, truncated=True, kth_hash=-2129643907)
+    HashReservoir(sample_size=4096, kth_hash=-2129643907)
 
 
 
@@ -213,15 +206,15 @@ Interestingly, our hash reservoir has also provided a [reasonable solution to th
 
 ```python
 def _sample_rate(self):
-    if self.truncated:
-        if self.kth_hash < 0:
-            return -(INT_MIN - self.kth_hash) / INT_RANGE
+    if self.kth_hash < 0:
+        return -(INT_MIN - self.kth_hash) / INT_RANGE
+    if self.kth_has < INT_MAX:
         return self.kth_hash / INT_MAX / 2 + 0.5
     return 1.0
 
 
 def _nunique(self):
-    if self.truncated:
+    if self.kth_hash < INT_MAX:
         return self.sample_size / self.sample_rate
     return float(len(self.hashes))
 
@@ -305,6 +298,8 @@ My friend, it's turtles all the way down.
 
 As demonstrated above, we get a relatively good estimate of the number of unique values from a relatively small set. That means we can approximate the $k$th hash using a relatievly small hash reservoir.
 
+(No, there is nothing special about using a reservoir to estimate the number of unique values other than common implementation and ease of inspection. You could just as easily use HyperLogLog or whatever, subject to your particular restrictions.)
+
 
 ```python
 class ApproximateKth:
@@ -329,10 +324,6 @@ class ApproximateKth:
         return self
 
     @property
-    def truncated(self):
-        return self.kth_hash < INT_MAX
-
-    @property
     def kth_hash(self):
         nunique = self.reservoir.nunique
         if nunique < self.sample_size:
@@ -348,13 +339,12 @@ class ApproximateKth:
     def __repr__(self):
         return (
             f"ApproximateKth(sample_size={self.sample_size},"
-            f" truncated={self.truncated},"
             f" kth_hash={self.kth_hash},"
             f" reservoir={self.reservoir})"
         )
 ```
 
-We can test the efficiency and accuracy of this approach relative to an "exact" reservoir with a large-but-not-too-large sample size. In this single test, we approximate the $k$th hash with trivial error but about 25 times faster. The computational gains increase as sample size increases. In adtech, for example, there may be use cases for a sample size in the _billions_ (in which case you need to use a 64-bit hash function!).
+We can test the efficiency and accuracy of this approach relative to an "exact" reservoir with a large-but-not-too-large sample size. In this single test, we approximate the $k$th hash with trivial error but about 24 times faster. The computational gains increase as sample size increases. In adtech, for example, there may be use cases for a sample size in the _billions_ (in which case you need to use a 64-bit hash function!).
 
 
 ```python
@@ -384,12 +374,13 @@ np.log(
 ```
 
 
+      0%|          | 0/100 [00:00<?, ?it/s]
 
 
 
 
 
-    (0.0, 24.556453807288484)
+    (0.0, 23.63257755196555)
 
 
 
