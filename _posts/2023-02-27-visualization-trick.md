@@ -3,6 +3,8 @@ layout: post
 author: "Patrick Nicholson"
 title: "A visualization trick obvious in hindsight"
 excerpt: "Data visualization is a key part of every data science and machine learning project. It can be difficult given that we usually have more points to draw than space on screen. Most of us realize pretty quickly that we can summarize data for certain visualizations, the most common being the histogram. What took me an embarrassingly long time to realize is that scatterplots can be easily handled by its generalization: the <i>nd</i>-histogram."
+notebook:
+    path: /notebooks/visualization-trick.ipynb
 image:
     path: /notebooks/visualization-trick_files/visualization-trick_9_0.png
 ---

@@ -11,7 +11,7 @@ author:
 paginate: 20
 
 github:
-  repo: https://github.com/patrick-nicholson/patrick-nicholson.github.io
+  repo: https://github.com/patrick-nicholson/patrick-nicholson.github.io/
 
 markdown: redcarpet
 permalink: pretty

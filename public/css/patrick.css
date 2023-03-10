@@ -2,12 +2,26 @@
 }
 
 #github {
-    display:inline-block;
-    margin-right:10px;
+    display: inline-block;
+    margin-right: 10px;
 }
 
 #linkedin {
-    display:inline-block;
+    display: inline-block;
+}
+
+#notebook {
+    display: flex;
+    justify-content: left;
+    align-content: center;
+    align-items: stretch;
+}
+
+#notebook-icon {
+    position: relative;
+    /* Adjust these values accordingly */
+    top: 5px;
+    left: 5px;
 }
 
 .code pre {

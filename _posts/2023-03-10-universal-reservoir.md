@@ -3,6 +3,8 @@ layout: post
 author: "Patrick Nicholson"
 title: "Universal reservoir: sampling a fixed number of elements from unbounded data"
 excerpt: "Reservoir sampling is the process of sampling a fixed number of elements from unbounded data. Universal hash functions provide an efficient, deterministic, and infinitely scalable approach to the reservoir that is easy to implement in any data environment."
+notebook: 
+    path: /notebooks/universal-reservoir.ipynb
 image:
     path: /notebooks/universal-reservoir_files/universal-reservoir_15_0.png
 ---

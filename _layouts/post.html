@@ -5,6 +5,14 @@ layout: default
 <div class="post">
   <h1 class="post-title">{{ page.title }}</h1>
   <span class="post-date">{{ page.date | date_to_string }}</span>
+  {% if page.notebook.path != null %}
+    <span>
+      <a id="notebook" href="{{ site.github.repo }}blob/main{{ page.notebook.path }}">
+        <img id="notebook-icon" src="/public/github-mark.png" alt="Github"/>
+        <code>[link to notebook]</code>
+      </a>
+    </span>
+  {% endif %}
   {{ content }}
 </div>
 

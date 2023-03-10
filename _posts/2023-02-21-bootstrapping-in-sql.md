@@ -3,6 +3,8 @@ layout: post
 author: "Patrick Nicholson"
 title: "Bootstrapping in SQL; or, getting s--- done with the tools you have"
 excerpt: "SQL is the lingua franca of data platforms. It is many things, but a statistical language is not one of them. In this post, I'll cover an approach to bootstrap when it's your best, or only, option."
+notebook:
+    path: /notebooks/bootstrapping-in-sql.ipynb
 image:
     path: /notebooks/palpatine-bootstrap.jpg
 ---

@@ -3,6 +3,8 @@ layout: post
 author: "Patrick Nicholson"
 title: "Universal sampling: better sampling for a better tomorrow"
 excerpt: "Universal hash functions efficiently and deterministically map arbitrary input to uniformly distributed integers. In this post, I demonstrate how to leverage these functions for sampling from datasets and distributions."
+notebook:
+    path: /notebooks/universal-sampling.ipynb
 image:
     path: /notebooks/universal-sampling_files/universal-sampling_38_0.png
 ---
