@@ -7,9 +7,6 @@ build:
 jupyter: colima build
 	docker run -it --rm -p 8888:8888 -v "${PWD}":/home/jovyan/work myjupyter
 
-ray: colima build
-	docker run -it --shm-size=4gb --rm -p 8888:8888 -v "${PWD}":/home/jovyan/work myjupyter
-
 postgres: colima build
 	docker-compose up
 
