@@ -19,31 +19,11 @@
 
 #notebook-icon {
     position: relative;
-    /* Adjust these values accordingly */
-    top: 5px;
-    left: 5px;
+    top: 3px;
 }
 
-.code pre {
+.highlight {
+    max-width: 70ch;
+    overflow: auto;
     white-space: pre;
-    margin-top: 0;
-    margin-bottom: .1rem;
-    padding: 1rem;
 }
-
-.highlighter-coderay {
-    overflow-x: auto;
-    max-width: 100%;
-    scrollbar-color: darkgrey transparent;
-}
-
-pre code {
-    padding: 0;
-    font-size: 100%;
-    color: inherit;
-    background-color: transparent;
-}
-
-/*.CodeRay {*/
-/*    display: inline-block;*/
-/*}*/
