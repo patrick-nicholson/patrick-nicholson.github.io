@@ -11,7 +11,7 @@ image:
 
 Data visualization is a key part of every data science and machine learning project. It can be difficult given that we usually have more points to draw than space on screen. Most of us realize pretty quickly that we can summarize data for certain visualizations, the most common being the histogram. What took me an embarrassingly long time to realize is that scatterplots can be easily handled by its generalization: the $nd$-histogram.
 
-Note: The [Datashader project](https://datashader.org/user_guide/Plotting_Pitfalls.html) has a good discussion of issues that worsen as data size increases.
+Note: The Datashader project has a [good discussion](https://datashader.org/user_guide/Plotting_Pitfalls.html) of issues that worsen as data size increases.
 
 
 ```python
@@ -121,4 +121,4 @@ ax.set(
 
 [Datashader](https://datashader.org/) is a fantastic project that supports other visualizations using the same principle of pixel-level aggregation of data prior to visualization. It integrates well with PyData tools (`pandas`, `dask`, etc.) and other tools within the larger [HoloViz](https://holoviz.org/) project. If that works for you, then you should absolutely take advantage.
 
-However, Datashader isn't always an option. For example, my workflows primarily involve non-Python tools like Spark and Snowflake. The technique described above allows me to efficiently and natively perform aggregations and visualize the results.
+However, Datashader isn't always an option. For example, my workflows primarily involve non-Python tools like Spark, Snowflake, and Postgres. The technique described above allows me to efficiently and natively perform aggregations and visualize the results.

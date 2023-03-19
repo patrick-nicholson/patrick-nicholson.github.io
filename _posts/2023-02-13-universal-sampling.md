@@ -68,7 +68,7 @@ def mmhash(values):
 
 ## Hashing
 
-Let's take a look at universal hashing in Python with `scikit-learn`'s MurmurHash implementation. For exmaple inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$. 
+Let's take a look at universal hashing in Python with `scikit-learn`'s MurmurHash implementation. For example inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$. 
 
 
 ```python
@@ -181,7 +181,7 @@ ax.set_title("Distribution of truncated MD5 hashes");
 
 ## Random sampling
 
-<div class="alert alert-block alert-info" > I'm going to compare the <code>pandas</code> sampling interface with universal sampling. The <code>pandas</code> interface is generally representative of the tools I'm familiar with (PySpark, R base/<code>dplyr</code>, SQL, etc.). It would not surprise me to learn that there are richer implementations around that don't have some of the downsides I'll point out below. </div> 
+<div class="alert alert-block alert-info" > I'm going to compare the <code>pandas</code> sampling interface with universal sampling. The <code>pandas</code> interface is generally representative of the tools I'm familiar with (PySpark, R base/<code>dplyr</code>, SQL, etc.). It would not surprise me to learn that there are some richer implementations that don't have some of the downsides I'll point out below. </div> 
 
 
 The simplest application of universal hashing is random sampling. We start with a representative dataframe of users, individual activity, and scores.
@@ -293,7 +293,7 @@ sample0.equals(sample1)
 
 
 
-More general forms of random sampling are usually incovenient. For example, sampling half of our users requires deduplicating the users and sampling from that set, then filtering the original data.
+More general forms of random sampling are usually inconvenient. For example, sampling half of our users requires deduplicating the users and sampling from that set, then filtering the original data.
 
 
 ```python

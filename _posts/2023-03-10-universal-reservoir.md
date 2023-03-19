@@ -63,7 +63,7 @@ Traditional reservoir sampling algorithms work when both of these conditions are
 1. Inputs are independent. For example, simple random sampling of rows or multistage sampling from deduplicated data. 
 2. The desired sample size is small enough to efficiently hold in memory
 
-This conditions are very restrictive in practice. For example, we might want to sample devices from a large stream of advertising data for realtime monitoring and reporting on many different metrics (e.g., by client).
+This is restrictive in practice. For example, we might want to sample devices from a large stream of advertising data for realtime monitoring and reporting on many different metrics (e.g., by client).
 
 1. The data are not independent. We must deduplicate and detect new devices prior to building the reservoir.
 2. The true sample size is quickly infeasible; it's (sample size per metric) $\times$ (number of metrics). We then find ourselves creating many different reservoirs and streams.

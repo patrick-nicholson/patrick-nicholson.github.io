@@ -282,8 +282,7 @@ CREATE FUNCTION poisson_draws(lambda DOUBLE PRECISION)
     RETURNS poisson_draw[]
 AS
 $$
-WITH
-    RECURSIVE
+WITH RECURSIVE
     quantiles AS (
         SELECT 0 AS x, EXP(-lambda) AS p, EXP(-lambda) AS s
         UNION ALL

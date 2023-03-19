@@ -342,7 +342,7 @@ ax.set_title(
 
 ## Universal bootstrap for hypothesis testing
 
-While baby's first bootstrap was fun and all, the practical power of bootstrapping is really revealed when estimating the $H_0$ distribution of a hypothesis test. 
+While baby's first bootstrap was fun and all, the practical power of bootstrapping is revealed when estimating the $H_0$ distribution of a hypothesis test. 
 
 Given a sample of $N = n^T + n^C$ units with $n^T$ test units and $n^C$ control units, a single bootstrap iteration samples (with replacement) pseudo-test and pseudo-control groups; each pseudo group is (approximately) the same size as the true group. That is, we randomly assign (with replacement) each unit to the pseudo groups. The iteration's sample statistic (e.g., difference in means) is then calculated from the pseudo groups.
 
@@ -638,7 +638,7 @@ fit.get_robustcov_results(
 
 
 
-As universal bootstrap is based on universal sampling, it is  straightforward to implement complex designs. In this case, the intervention is applied at the class level, so we hash the class ID.
+As universal bootstrap is based on universal sampling, it is straightforward to implement complex designs. In this case, the intervention is applied at the class level, so we hash the class ID.
 
 
 ```python
