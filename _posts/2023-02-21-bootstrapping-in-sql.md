@@ -13,7 +13,7 @@ image:
 
 Bootstrapping has so many useful properties that I often want to apply it everywhere. In my [previous post](/2023/02/20/universal-bootstrap/), I covered the universal bootstrap, a method that combines universal hash functions and the Poisson bootstrap. While I feel that it has strong benefits even in local-analysis tools like Python, it certainly is not the required way to do bootstrapping, so readers may not have immediately grasped its generalization.
 
-Many common tools built specifically for data science/engineering often have language APIs (e.g., Spark and Flink). In such cases, the bootstrapping methods discussed in that post can be relatively easily adapted to those APIs for an idiomatic and efficient approach. However, not all tools are like this (looking at you Snowflake), and we're not always asked or able to do analyses in them anyway.
+Many common tools built specifically for data science/engineering often have language APIs (e.g., Spark and Flink). In such cases, the bootstrapping methods discussed in that post can be relatively easily adapted to those APIs for an idiomatic and efficient approach. However, not all tools are like this, and we're not always asked or able to do analyses in them anyway.
 
 SQL is the _lingua franca_ of data platforms. It is many things, but a statistical language is not one of them. In this post, I'll cover an approach to bootstrap when it's your best, or only, option. However, to my knowledge there will be differences in implementation details or idioms that will need to differ between platforms. I'm only covering Postgres here, but it should be enough to get you started with any vendor.
 
@@ -634,4 +634,4 @@ fig.tight_layout();
 
 ## Wrapping up
 
-You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins feel it.
+You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, or anywhere else you prefer to use SQL. Go make your DBadmins feel it.
