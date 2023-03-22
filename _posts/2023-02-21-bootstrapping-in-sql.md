@@ -22,8 +22,7 @@ SQL is the _lingua franca_ of data platforms. It is many things, but a statistic
 from sqlalchemy import create_engine
 
 postgres = create_engine(
-    "postgresql+psycopg://postgres:postgres"
-    "@host.docker.internal:5432/postgres"
+    "postgresql+psycopg://postgres:postgres@host.docker.internal:5432/postgres"
 )
 
 
@@ -60,7 +59,7 @@ test_scores.to_sql(
 
 Suppose `iris` is a Postgres table and we want to get the bootstrap distribution of a statistic. A naive way to do this is to repeatedly query the table. A better way is to use the universal bootstrap.
 
-Postgres does not have a fast, non-cryptographic hash function by default. There are some extensions available that provide them, and you could write a user-defined function to expose one from another language. However, to demonstrate that this is possible in pure SQL, I use MD5 as my hashing function. Since MD5 returns 128 bits, I actually split this up into four 32-bit hashes. You can certainly treat each hash column separately, but it's straightforward to turn them into row values into a single column that is much simpler to use.
+Postgres does not have a fast, non-cryptographic hash function by default. There are some extensions available that provide them, and you could write a user-defined function to expose one from another language. However, to demonstrate that this is possible in pure SQL, I use MD5 as my hashing function. Postgres's MD5 returns 128 hex-encoded bits from a text input; I just take the first 32 bits as an integer (`INT4` in Postgres).
 
 
 
@@ -68,80 +67,24 @@ Postgres does not have a fast, non-cryptographic hash function by default. There
 ```sql
 
 
-CREATE TYPE hash AS
-(
-    __hash_index INT,
-    __hash_value INT
-);
-
-
 /**
-  Generate up to 4 32-bit hashes
-  
+  Create a 32-bit hash from text
+
   Parameters
   ----------
-  val TEXT  
+  val TEXT
     The source column to hash
-  hashes INT
-    The number of hashes to keep (between 1 and 4)
-  
+
   Returns
   -------
-  hashes SET
-    Up to 4 hashes per row
+  INT4
+    32-bit hash value
  */
-CREATE FUNCTION generate_hashes(val TEXT, hashes INT)
-    RETURNS SETOF hash
+CREATE OR REPLACE FUNCTION hash(col TEXT)
+    RETURNS INT
 AS
 $$
-
-WITH
-
--- apply md5 as the hash function
-md5_applied AS (
-    SELECT MD5(val::TEXT) AS __md5
-),
-
--- turn the md5 into a 128 bitarray
-md5_bits AS (
-    SELECT
-        ('x' || __md5)::BIT(128) AS __bits
-    FROM
-        md5_applied
-),
-
--- get four 32-bit segments as 32-bit integers
-with_hash_columns AS (
-    SELECT
-        (__bits << 0)::BIT(32)::INT  AS __hash0,
-        (__bits << 32)::BIT(32)::INT AS __hash1,
-        (__bits << 64)::BIT(32)::INT AS __hash2,
-        (__bits << 96)::BIT(32)::INT AS __hash3
-    FROM
-        md5_bits
-),
-
--- flatten the four columns into rows
-rows AS (
-    SELECT
-        UNNEST(ARRAY [
-            ROW(0, __hash0)::hash,
-            ROW(1, __hash1)::hash,
-            ROW(2, __hash2)::hash,
-            ROW(3, __hash3)::hash
-            ]) AS __hash
-    FROM
-        with_hash_columns
-)
-
--- back to the correct format
-SELECT
-    (__hash).*
-FROM
-    rows
-WHERE
-    (__hash).__hash_index < hashes
-    ;
+SELECT ('x' || MD5(col))::BIT(128)::BIT(32)::INT
 $$ LANGUAGE sql;
 
 ```
@@ -157,12 +100,6 @@ Next, we need a way to randomize hashes. The approach is the same as in the prev
 
 ```sql
 
-CREATE TYPE random_integer AS
-(
-    __random_index INT,
-    __random_value INT
-);
-
 /**
   Generate an arbitrary number of random integers (int4)
 
@@ -176,74 +113,39 @@ CREATE TYPE random_integer AS
   Returns
   -------
   ARRAY
-    An array of length num 
+    An array of length num
  */
-CREATE FUNCTION random_integers(num INT, seed DOUBLE PRECISION)
-    RETURNS random_integer[]
+CREATE OR REPLACE FUNCTION generate_random_integers(num INT)
+    RETURNS INT[]
 AS
 $$
-SELECT SETSEED(seed);
-WITH
-    random AS (
-        SELECT
-            __random_index,
-            FLOOR(RANDOM() * 4294967296 + -2147483648)::INT 
-                AS __random_value
-        FROM
-            GENERATE_SERIES(0, num - 1) __random_index
-    )
-
 SELECT
-    ARRAY_AGG(ROW (__random_index, __random_value)::random_integer)
+    ARRAY_AGG(FLOOR(RANDOM() * 4294967296 + -2147483648)::INT)
 FROM
-    random
+    GENERATE_SERIES(1, num)
 ;
 $$ LANGUAGE sql;
-
-
-
-CREATE FUNCTION __bigint_to_int(value BIGINT)
-    RETURNS INT
-AS
-$$
-SELECT (((value % 4294967296) + 4294967296) 
-    % 4294967296)::BIT(32)::INT;
-$$ LANGUAGE SQL;
 
 
 /**
-  Combines hash generation with randomization
-
+  Performs wrapped 32-bit multiplication
+  
   Parameters
   ----------
-  val TEXT
-    The source column to hash
-  hashes INT
-    The number of hashes to keep (between 1 and 4)
-  random_integers ARRAY
-    Randomizing integers from random_integers function
+  x, y INT
+    Values to multiply
 
   Returns
   -------
-  hashes SET
-    Up to `hashes` hashes per row
+  INT
+    Result of multiplication with wrapping
  */
-CREATE FUNCTION generate_randomized_hashes(val TEXT, hashes INT, 
-    random_integers random_integer[])
-    RETURNS SETOF hash
+CREATE OR REPLACE FUNCTION wrapped_multiply(x INT, y INT)
+    RETURNS INT
 AS
 $$
-SELECT
-    ((rix).__random_index << 2) | __hash_index AS __hash_index,
-    __bigint_to_int(__hash_value::BIGINT * (rix).__random_value) 
-        AS __hash_value
-FROM
-    generate_hashes(val, hashes) AS h,
-    ( select unnest(random_integers)::random_integer as rix ) r
-WHERE
-    ((rix).__random_index << 2) | __hash_index < hashes
-;
-$$ LANGUAGE sql;
+SELECT ((((x::BIGINT * y) % 4294967296) + 4294967296) % 4294967296)::BIT(32)::INT
+$$ LANGUAGE SQL;
 
 ```
 
@@ -258,27 +160,27 @@ Next, we need to map uniform integers to Poisson values. This is straightforward
 
 CREATE TYPE poisson_draw AS
 (
-    __poisson_lower INT,
-    __poisson_upper INT,
-    __poisson_value INT
+    lower INT,
+    upper INT,
+    value INT
 );
 
 
 /**
   Draw integer ranges for a Poisson distribution
-  
+
   Parameters
   ----------
   lambda DOUBLE PRECISION
     The mean of the distribution
-  
+
   Returns
   -------
   ARRAY
-    Array of inclusive integer ranges for 99.9999% of the 
+    Array of inclusive integer ranges for 99.9999% of the
     distribution
  */
-CREATE FUNCTION poisson_draws(lambda DOUBLE PRECISION)
+CREATE OR REPLACE FUNCTION generate_poisson_draws(lambda DOUBLE PRECISION)
     RETURNS poisson_draw[]
 AS
 $$
@@ -286,14 +188,12 @@ WITH RECURSIVE
     quantiles AS (
         SELECT 0 AS x, EXP(-lambda) AS p, EXP(-lambda) AS s
         UNION ALL
-        SELECT x + 1, p * lambda / (x + 1), s + p * lambda / (x + 1) 
-        FROM quantiles 
+        SELECT x + 1, p * lambda / (x + 1), s + p * lambda / (x + 1)
+        FROM quantiles
         WHERE s < .999999
     ),
     rights AS (
-        SELECT 
-            FLOOR(s * 4294967296 + -2147483648) AS upper, 
-            x AS value
+        SELECT FLOOR(s * 4294967296 + -2147483648) AS upper, x AS value
         FROM quantiles
     ),
     intmax AS (
@@ -317,8 +217,7 @@ WITH RECURSIVE
     ),
     lowers AS (
         SELECT
-            COALESCE(LAG(upper) OVER (ORDER BY value) + 1, 
-                -2147483648) AS lower,
+            COALESCE(LAG(upper) OVER (ORDER BY value) + 1, -2147483648) AS lower,
             upper,
             value
         FROM
@@ -329,7 +228,6 @@ SELECT
     ARRAY_AGG(ROW (lower, upper, value)::poisson_draw)
 FROM
     lowers
-;
 $$ LANGUAGE sql;
 
 ```
@@ -343,20 +241,11 @@ Finally, we compose this all together. A bootstrap is configured by the sample f
 
 ```sql
 
-CREATE TYPE group_configuration AS
-(
-    __group_index   INT,
-    __poisson_lower INT,
-    __poisson_upper INT,
-    __poisson_value INT
-);
-
 CREATE TYPE bootstrap_configuration AS
 (
-    __num_hashes      INT,
-    __num_groups      INT,
-    __groups          group_configuration[],
-    __random_integers random_integer[]
+    group_index INT,
+    random_integers INT[],
+    poisson_draws poisson_draw[]
 );
 
 
@@ -372,54 +261,21 @@ CREATE TYPE bootstrap_configuration AS
   seed DOUBLE PRECISION
     The random number generator seed
  */
-CREATE FUNCTION configure_bootstrap(
-    group_fractions DOUBLE PRECISION[], replications INT, 
-    seed DOUBLE PRECISION)
-    RETURNS bootstrap_configuration
+CREATE FUNCTION configure_bootstrap(group_fractions DOUBLE PRECISION[], replications INT, seed DOUBLE PRECISION)
+    RETURNS bootstrap_configuration[]
 AS
 $$
-
-WITH
-    num_groups AS (
-        SELECT ARRAY_LENGTH(group_fractions, 1) AS num_groups
-    ),
-    draws AS (
-        SELECT
-            ix - 1 AS __group_index,
-            UNNEST(poisson_draws(group_fractions[ix]))::poisson_draw 
-                AS draw
-        FROM
-            GENERATE_SUBSCRIPTS(group_fractions, 1) ix
-    ),
-    groups AS (
-        SELECT
-            ARRAY_AGG(ROW(
-                __group_index,
-                (draw).__poisson_lower,
-                (draw).__poisson_upper,
-                (draw).__poisson_value
-                )::group_configuration) AS __groups
-        FROM
-            draws
-        WHERE
-            0 < (draw).__poisson_value
-    ),
-    random_size AS (
-        SELECT
-            CEIL(replications::FLOAT * num_groups / 4)::INT 
-                AS num_random
-        FROM
-            num_groups
-    )
-
+SELECT SETSEED(seed);
 SELECT
-    ROW (replications * num_groups, num_groups, __groups, 
-         random_integers(num_random, seed))
-FROM
-    num_groups,
-    groups,
-    random_size
-;
+    ARRAY_AGG(ROW(groups.*)::bootstrap_configuration)
+FROM (
+    SELECT
+        ix - 1,
+        generate_random_integers(replications),
+        generate_poisson_draws(frac)
+    FROM
+        UNNEST(group_fractions) WITH ORDINALITY AS t(frac, ix)
+) groups;
 $$ LANGUAGE sql;
 
 
@@ -435,9 +291,8 @@ $$ LANGUAGE sql;
   seed DOUBLE PRECISION
     The random number generator seed
  */
-CREATE FUNCTION configure_bootstrap(fraction DOUBLE PRECISION, 
-    replications INT, seed DOUBLE PRECISION)
-    RETURNS bootstrap_configuration
+CREATE OR REPLACE FUNCTION configure_bootstrap(fraction DOUBLE PRECISION, replications INT, seed DOUBLE PRECISION)
+    RETURNS bootstrap_configuration[]
 AS
 $$
 SELECT configure_bootstrap(ARRAY[fraction], replications, seed);
@@ -450,18 +305,17 @@ $$ LANGUAGE sql;
 
   Parameters
   ----------
-  val TEXT  
+  val TEXT
     The source column to hash
   config bootstrap_configuration
     A configuration returned by the `configure_bootstrap` function
-  
+
   Returns
   -------
   SET
     A set of rows for the bootstrap results
  */
-CREATE FUNCTION poisson_bootstrap(val TEXT, 
-    config bootstrap_configuration)
+CREATE OR REPLACE FUNCTION poisson_bootstrap(col TEXT, config bootstrap_configuration[])
     RETURNS TABLE
             (
                 __replication_index INT,
@@ -469,20 +323,25 @@ CREATE FUNCTION poisson_bootstrap(val TEXT,
             )
 AS
 $$
+WITH weights as (
+    SELECT
+        r.hash_ix - 1 as replication,
+        grp.group_index,
+        pois.value
+    FROM
+        (select (unnest(config)::bootstrap_configuration).*) as grp,
+        lateral unnest(random_integers) with ordinality as r(randint, hash_ix),
+        lateral (select (unnest(poisson_draws)::poisson_draw).*) as pois
+    WHERE
+        wrapped_multiply(hash(col), r.randint) between pois.lower and pois.upper
+)
+
 SELECT
-    __hash_index / (config).__num_groups,
-    (grp).__group_index
+    replication,
+    group_index
 FROM
-    generate_randomized_hashes(val, (config).__num_hashes, 
-        (config).__random_integers),
-    ( SELECT UNNEST((config.__groups))::group_configuration AS grp ) 
-        AS groups, 
-    LATERAL GENERATE_SERIES(1, (grp).__poisson_value)
-WHERE
-    __hash_index % (config).__num_groups = (grp).__group_index
-    AND (grp).__poisson_lower <= __hash_value 
-    AND __hash_value <= (grp).__poisson_upper
-;
+    weights,
+    lateral generate_series(1, weights.value)
 $$ LANGUAGE sql;
 
 ```
@@ -505,8 +364,7 @@ select
     avg(sepal_length) as estimate
 from 
     iris, 
-    lateral poisson_bootstrap(row_id::text, 
-        configure_bootstrap(1, 200, .5))
+    lateral poisson_bootstrap(row_id::text, configure_bootstrap(1, 200, .5))
 group by 1
 
 ```
@@ -545,7 +403,7 @@ fig.tight_layout();
 
 
     
-![png](/notebooks/bootstrapping-in-sql_files/bootstrapping-in-sql_14_0.png)
+![png](/notebooks/bootstrapping-in-sql_files/nb_14_0.png)
     
 
 
@@ -628,10 +486,10 @@ fig.tight_layout();
 
 
     
-![png](/notebooks/bootstrapping-in-sql_files/bootstrapping-in-sql_17_0.png)
+![png](/notebooks/bootstrapping-in-sql_files/nb_17_0.png)
     
 
 
 ## Wrapping up
 
-You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, or anywhere else you prefer to use SQL. Go make your DBadmins feel it.
+You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins feel it.
