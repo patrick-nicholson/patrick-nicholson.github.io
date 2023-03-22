@@ -66,8 +66,6 @@ Postgres does not have a fast, non-cryptographic hash function by default. There
 
 
 ```sql
-
-
 /**
   Create a 32-bit hash from text
 
@@ -87,7 +85,6 @@ AS
 $$
 SELECT ('x' || MD5(col))::BIT(128)::BIT(32)::INT
 $$ LANGUAGE sql;
-
 ```
 
 
@@ -100,7 +97,6 @@ Next, we need a way to randomize hashes. The approach is the same as in the prev
 
 
 ```sql
-
 /**
   Generate an arbitrary number of random integers (int4)
 
@@ -148,7 +144,6 @@ $$
 SELECT ((((x::BIGINT * y) % 4294967296) + 4294967296) 
     % 4294967296)::BIT(32)::INT
 $$ LANGUAGE SQL;
-
 ```
 
 
@@ -159,7 +154,6 @@ Next, we need to map uniform integers to Poisson values. This is straightforward
 
 
 ```sql
-
 CREATE TYPE poisson_cdf_interval AS
 (
     cdf_lower INT,
@@ -234,7 +228,6 @@ SELECT
 FROM
     lowers
 $$ LANGUAGE sql;
-
 ```
 
 
@@ -245,7 +238,6 @@ Finally, we compose this all together. A bootstrap is configured by the sample f
 
 
 ```sql
-
 CREATE TYPE bootstrap_group_configuration AS
 (
     group_index INT,
@@ -339,7 +331,6 @@ FROM
     weights,
     lateral generate_series(1, poisson_value)
 $$ LANGUAGE sql;
-
 ```
 
 
@@ -352,7 +343,6 @@ Baby, let's bootstrap. It's simply an aggregation including the necessary bootst
 
 
 ```sql
-
 select 
     __replication_index, 
     count(1) as samples, 
@@ -363,7 +353,6 @@ from
     lateral poisson_bootstrap(row_id::text, 
         configure_bootstrap(ARRAY[1], 200, .5))
 group by 1
-
 ```
 
 
@@ -412,7 +401,6 @@ Yes, you can even do this in SQL. Since difference-in-differences has a simple a
 
 
 ```sql
-
 with 
 
 configure as (
@@ -457,7 +445,6 @@ select
         as estimate
 from
     pivot
-
 ```
 
 
