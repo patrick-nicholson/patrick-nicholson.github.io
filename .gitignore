@@ -1,7 +1,7 @@
 **/.DS_Store
-.idea/
-.jekyll-cache/
+**/.idea/
+**/.jekyll-cache/
 **/.ipynb_checkpoints/
 _site/
-notebooks/data/
-notebooks/graveyard/
+_notebooks/data/
+_notebooks/graveyard/

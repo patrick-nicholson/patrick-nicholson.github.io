@@ -18,12 +18,3 @@ permalink: pretty
 
 plugins:
   - jekyll-seo-tag
-
-exclude:
-  - "*.sh"
-  - "**/Dockerfile"
-  - "**/Makefile"
-  - "**/docker-compose.yaml"
-  - "**/TODO"
-  - "**/TODO.*"
-  - "notebooks/graveyard/"

@@ -1,8 +1,8 @@
 services:
 
-  jupyter_sql:
-    container_name: myjupyter
-    image: myjupyter
+  jupyter:
+    container_name: jupyter_postgres
+    image: jupyter_postgres
     ports:
       - "8888:8888"
     volumes:

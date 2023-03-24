@@ -1,0 +1,28 @@
+services:
+
+  jupyter:
+    container_name: jupyter_postgres
+    image: jupyter_postgres
+    ports:
+      - "8888:8888"
+    volumes:
+      - "${PWD}:/home/jovyan/work"
+    networks:
+      - nilsson
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - nilsson
+    restart: always
+
+networks:
+  nilsson:
+    driver: bridge

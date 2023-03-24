@@ -4,9 +4,9 @@ author: "Patrick Nicholson"
 title: "Universal sampling: better sampling for a better tomorrow"
 excerpt: "Universal hash functions efficiently and deterministically map arbitrary input to uniformly distributed integers. In this post, I demonstrate how to leverage these functions for sampling from datasets and distributions."
 notebook:
-    path: /notebooks/universal-sampling.ipynb
+    path: /public/universal-sampling.ipynb
 image:
-    path: /notebooks/universal-sampling_files/universal-sampling_38_0.png
+    path: /public/universal-sampling_files/universal-sampling_38_0.png
 ---
 
 [Universal hashing](https://en.wikipedia.org/wiki/Universal_hashing) is a powerful primitive for statistical analysis at scale. Universal hash functions efficiently and deterministically map inputs to integers that are uniformly distributed within the binary range of an integer type (e.g., a 64-bit long).
@@ -104,7 +104,7 @@ fig.tight_layout();
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_4_0.png)
+![png](/public/universal-sampling_files/universal-sampling_4_0.png)
     
 
 
@@ -149,7 +149,7 @@ ax.set_title("Active bits per hash");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_8_0.png)
+![png](/public/universal-sampling_files/universal-sampling_8_0.png)
     
 
 
@@ -175,7 +175,7 @@ ax.set_title("Distribution of truncated MD5 hashes");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_11_0.png)
+![png](/public/universal-sampling_files/universal-sampling_11_0.png)
     
 
 
@@ -787,7 +787,7 @@ plt.tight_layout();
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_38_0.png)
+![png](/public/universal-sampling_files/universal-sampling_38_0.png)
     
 
 
@@ -844,7 +844,7 @@ poisson_sampling(integer_hashes, 2)
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_41_0.png)
+![png](/public/universal-sampling_files/universal-sampling_41_0.png)
     
 
 
@@ -857,7 +857,7 @@ poisson_sampling(integer_hashes, 10000)
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_43_0.png)
+![png](/public/universal-sampling_files/universal-sampling_43_0.png)
     
 
 
@@ -957,7 +957,7 @@ ax.set_title("Approximate samples from Pois($10^6$)");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_47_0.png)
+![png](/public/universal-sampling_files/universal-sampling_47_0.png)
     
 
 
@@ -969,7 +969,7 @@ ax.set_title("Approximate samples from N(10, 10)");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_48_0.png)
+![png](/public/universal-sampling_files/universal-sampling_48_0.png)
     
 
 
@@ -981,7 +981,7 @@ ax.set_title("Approximate samples from $\Gamma(1, 2)$");
 
 
     
-![png](/notebooks/universal-sampling_files/universal-sampling_49_0.png)
+![png](/public/universal-sampling_files/universal-sampling_49_0.png)
     
 
 

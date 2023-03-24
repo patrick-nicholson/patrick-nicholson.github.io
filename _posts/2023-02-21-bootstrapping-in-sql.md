@@ -4,12 +4,12 @@ author: "Patrick Nicholson"
 title: "Bootstrapping in SQL; or, getting s--- done with the tools you have"
 excerpt: "SQL is the lingua franca of data platforms. It is many things, but a statistical language is not one of them. In this post, I'll cover an approach to bootstrap when it's your best, or only, option."
 notebook:
-    path: /notebooks/bootstrapping-in-sql.ipynb
+    path: /public/bootstrapping-in-sql.ipynb
 image:
-    path: /notebooks/palpatine-bootstrap.jpg
+    path: /public/palpatine-bootstrap.jpg
 ---
 
-![jpg](/notebooks/palpatine-bootstrap.jpg)
+![jpg](/public/palpatine-bootstrap.jpg)
 
 Bootstrapping has so many useful properties that I often want to apply it everywhere. In my [previous post](/2023/02/20/universal-bootstrap/), I covered the universal bootstrap, a method that combines universal hash functions and the Poisson bootstrap. While I feel that it has strong benefits even in local-analysis tools like Python, it certainly is not the required way to do bootstrapping, so readers may not have immediately grasped its generalization.
 
@@ -45,7 +45,7 @@ def execute_postgres(stmt):
 
 def display_sql(text):
     """Prettier display of my SQL strings"""
-    return Markdown(f"```sql\n{text}\n```")
+    return Markdown(f"```sql\n{text.strip()}\n```")
 
 
 iris.rename_axis("row_id").to_sql(
@@ -389,7 +389,7 @@ fig.tight_layout();
 
 
     
-![png](/notebooks/bootstrapping-in-sql_files/nb_14_0.png)
+![png](/public/bootstrapping-in-sql_files/nb_14_0.png)
     
 
 
@@ -473,7 +473,7 @@ fig.tight_layout();
 
 
     
-![png](/notebooks/bootstrapping-in-sql_files/nb_17_0.png)
+![png](/public/bootstrapping-in-sql_files/nb_17_0.png)
     
 
 

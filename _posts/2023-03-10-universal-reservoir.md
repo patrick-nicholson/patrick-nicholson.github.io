@@ -4,9 +4,9 @@ author: "Patrick Nicholson"
 title: "Universal reservoir: sampling a fixed number of elements from unbounded data"
 excerpt: "Reservoir sampling is the process of sampling a fixed number of elements from unbounded data. Universal hash functions provide an efficient, deterministic, and infinitely scalable approach to the reservoir that is easy to implement in any data environment."
 notebook:
-    path: /notebooks/universal-reservoir.ipynb
+    path: /public/universal-reservoir.ipynb
 image:
-    path: /notebooks/universal-reservoir_files/nb_15_0.png
+    path: /public/universal-reservoir_files/nb_15_0.png
 ---
 
 How would you draw a fixed sample size from a set? You might randomly choose indices in the range of the size of the set, then select the corresponding elements. What if your set is too big to hold all at once? If you know the size of your set, you can determine the sample fraction and sample with it.
@@ -265,7 +265,7 @@ Visualizing the state helps explain the sampling process.
 
 
     
-![png](/notebooks/universal-reservoir_files/nb_15_0.png)
+![png](/public/universal-reservoir_files/nb_15_0.png)
     
 
 

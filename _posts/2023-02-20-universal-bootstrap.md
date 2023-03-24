@@ -4,9 +4,9 @@ author: "Patrick Nicholson"
 title: "Universal bootstrap: a superpower"
 excerpt: "Bootstrapping is commonly used in computational statistics and machine learning for uncertainty quantification, hypothesis testing, and ensembling. By combining universal sampling with Poisson bootstrap, I show how the universal bootstrap unlocks incredibly sophisticated analysis at any scale in any tool."
 notebook:
-    path: /notebooks/universal-bootstrap.ipynb
+    path: /public/universal-bootstrap.ipynb
 image:
-    path: /notebooks/universal-bootstrap_files/universal-bootstrap_30_0.png
+    path: /public/universal-bootstrap_files/universal-bootstrap_30_0.png
 ---
 
 > _Look on my computational methods, ye theorists, and despair_
@@ -256,7 +256,7 @@ ax.set_title("Bootstrap distribution of a sample statistic");
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_12_0.png)
+![png](/public/universal-bootstrap_files/universal-bootstrap_12_0.png)
     
 
 
@@ -300,7 +300,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_15_0.png)
+![png](/public/universal-bootstrap_files/universal-bootstrap_15_0.png)
     
 
 
@@ -336,7 +336,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_17_0.png)
+![png](/public/universal-bootstrap_files/universal-bootstrap_17_0.png)
     
 
 
@@ -450,7 +450,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_23_0.png)
+![png](/public/universal-bootstrap_files/universal-bootstrap_23_0.png)
     
 
 
@@ -689,7 +689,7 @@ ax.set_title(
 
 
     
-![png](/notebooks/universal-bootstrap_files/universal-bootstrap_30_0.png)
+![png](/public/universal-bootstrap_files/universal-bootstrap_30_0.png)
     
 
 
