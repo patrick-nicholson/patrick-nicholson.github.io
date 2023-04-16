@@ -876,18 +876,6 @@ The precision of the approximation is controlled by the size of the lookup table
 
 
 ```python
-stats.rv_continuous
-```
-
-
-
-
-    scipy.stats._distn_infrastructure.rv_continuous
-
-
-
-
-```python
 def inverse_approximation(
     hashes,
     distribution,
