@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en-us"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+
+<link rel="stylesheet" href="https://ptrcknchlsn.xyz/scss/main.min.css" />
+  
+<meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  
+
+<title>Universal sampling</title>
+
+
+<meta name="author" content="Patrick Nicholson">
+
+<meta name="description" content="Demonstrates and advocates sampling with universal hash functions">
+<link rel="canonical" href="https://ptrcknchlsn.xyz/posts/universal-sampling/">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Universal sampling">
+<meta property="og:description" content="Demonstrates and advocates sampling with universal hash functions">
+<meta property="og:url" content="https://ptrcknchlsn.xyz/posts/universal-sampling/">
+<meta property="article:published_time" content="2023-02-13T00:00:00-05:00">
+  <meta property="article:modified_time" content="2023-07-12T17:44:51-04:00">
+  
+
+<meta property="og:image" content="https://ptrcknchlsn.xyz/posts/universal-sampling/images/feature.png"/>
+  
+    <meta property="og:image:alt" content="Comparison of a random normal distribution from a traditional random number generator and a random normal approximation via hash functions" />
+  
+
+
+
+<meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-reservoir/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/visualization-trick/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-bootstrap/" />
+
+
+
+<meta name="twitter:title" content="Universal sampling">
+<meta name="twitter:description" content="Demonstrates and advocates sampling with universal hash functions">
+
+
+<meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:image" content="https://ptrcknchlsn.xyz/posts/universal-sampling/images/feature.png"/>
+  
+    <meta name="twitter:image:alt" content="Comparison of a random normal distribution from a traditional random number generator and a random normal approximation via hash functions">
+  
+
+
+
+
+
+  
+    
+  
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://ptrcknchlsn.xyz/#/schema/person/1",
+      "name": "Patrick Nicholson",
+      "url": "https://ptrcknchlsn.xyz/",
+      "image": {
+        "@type": "ImageObject",
+        "@id": "https://ptrcknchlsn.xyz/#/schema/image/1",
+        "url": "https://ptrcknchlsn.xyz/\u003cnil\u003e",
+        "width": null ,
+        "height": null ,
+        "caption": "Patrick Nicholson"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ptrcknchlsn.xyz/#/schema/website/1",
+      "url": "https://ptrcknchlsn.xyz/",
+      "name": "Occasionally clever",
+      "description": "The personal blog of Patrick Nicholson",
+      "publisher": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/",
+      "url": "https://ptrcknchlsn.xyz/posts/universal-sampling/",
+      "name": "Universal sampling: better sampling for a better tomorrow",
+      "description": "Demonstrates and advocates sampling with universal hash functions",
+      "isPartOf": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/website/1"
+      },
+      "about": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+      },
+      "datePublished": "2023-02-13T00:00:00-05:00",
+      "dateModified": "2023-07-12T17:44:51-04:00",
+      "breadcrumb": {
+        "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/#/schema/breadcrumb/1"
+      },
+      "primaryImageOfPage": {
+        "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/#/schema/image/2"
+      },
+      "inLanguage": "en-US",
+      "potentialAction": [{
+        "@type": "ReadAction", "target": ["https://ptrcknchlsn.xyz/posts/universal-sampling/"]
+      }]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/#/schema/breadcrumb/1",
+      "name": "Breadcrumbs",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "item": {
+          "@type": "WebPage",
+          "@id": "https://ptrcknchlsn.xyz",
+          "url": "https://ptrcknchlsn.xyz",
+          "name": "Home"
+          }
+        },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "item": {
+          "@type": "WebPage",
+          "@id": "https://ptrcknchlsn.xyz/posts/",
+          "url": "https://ptrcknchlsn.xyz/posts/",
+          "name": "Posts"
+          }
+        },{
+        "@type": "ListItem",
+        "position":  4 ,
+        "item": {
+          "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/"
+          }
+        }]
+    },
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://ptrcknchlsn.xyz/#/schema/article/1",
+          "headline": "Universal sampling: better sampling for a better tomorrow",
+          "description": "Demonstrates and advocates sampling with universal hash functions",
+          "isPartOf": {
+            "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/"
+          },
+          "mainEntityOfPage": {
+            "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/"
+          },
+          "datePublished": "2023-02-13T00:00:00-05:00",
+          "dateModified": "2023-07-12T17:44:51-04:00",
+          "author": {
+            "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+          },          
+          "publisher": {
+            "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+          },
+          "image": {
+            "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/#/schema/image/2"
+          }
+        }
+      ]
+    },{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ImageObject",
+          "@id": "https://ptrcknchlsn.xyz/posts/universal-sampling/#/schema/image/2",
+          "url": "https://ptrcknchlsn.xyz/posts/universal-sampling/images/feature.png",
+          "contentUrl": "https://ptrcknchlsn.xyz/posts/universal-sampling/images/feature.png",
+          "caption": "Comparison of a random normal distribution from a traditional random number generator and a random normal approximation via hash functions"
+        }
+      ]
+    }
+  ]
+}
+</script>
+  
+
+  
+
+</head><body>
+    <header class="container">
+  <nav class="main-nav" id="js-navbar">
+    
+      <a class="logo" href="https://ptrcknchlsn.xyz">Occasionally clever</a>
+    
+    <ul class="menu" id="js-menu">
+      
+      
+      <li class="menu-item--align">
+        <div class="switch">
+          <input class="switch-input" type="checkbox" id="themeSwitch">
+          <label aria-hidden="true" class="switch-label" for="themeSwitch">On</label>
+          <div aria-hidden="true" class="switch-marker"></div>
+        </div>
+      </li>
+    </ul>
+    <span class="nav-toggle" id="js-navbar-toggle">
+      <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="30" height="30" fill="var(--color-contrast-high)"><rect y="11" width="24" height="2" rx="1"/><rect y="4" width="24" height="2" rx="1"/><rect y="18" width="24" height="2" rx="1"/></svg>
+    </span>
+  </nav>
+</header><main class="section">
+<div class="container">
+  <section class="page-header">
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <h1 class="page-header-title">Universal sampling: better sampling for a better tomorrow</h1>
+    <div class="post-list-meta">
+      <div class="post-list-dates">Posted:
+  Feb 13, 2023&nbsp;&middot;&nbsp;
+    Updated: Jul 12, 2023&nbsp;&middot;&nbsp;11 min.</div>
+      
+      
+    </div>
+    <p class="page-header-desc">
+      <div class="single-feature-img">
+
+
+
+  
+
+
+<img class="feature-image" 
+     srcset="/posts/universal-sampling/images/feature.png 480w, /posts/universal-sampling/images/feature.png 800w"
+     sizes="(max-width: 600px) 480px, 800px"
+     src="/posts/universal-sampling/images/feature.png"
+     alt="Comparison of a random normal distribution from a traditional random number generator and a random normal approximation via hash functions">
+</div>Universal hash functions efficiently and deterministically map arbitrary input to uniformly distributed integers. In this post, I demonstrate how to leverage these functions for sampling from datasets and distributions.</p>
+      <div class="series">
+        <p>Part of the <a href="https://ptrcknchlsn.xyz/series/universal-sampling/">Universal Sampling</a> series:</p>
+        
+        <ol class="series-list">
+            <li>Universal sampling: better sampling for a better tomorrow<span class="series-this-post">This post!</span>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-bootstrap/">Universal bootstrap: a superpower</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/">Bootstrapping in SQL; or, getting s--- done with the tools you have</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/visualization-trick/">A visualization trick obvious in hindsight</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-reservoir/">Universal reservoir: sampling a fixed number of elements from unbounded data</a>
+              
+            </li>
+        </ol>
+      </div>
+    
+    
+  </section>
+</div>
+<div class="single-container-post">
+  
+
+  <div class="single-post-contents">
+    
+    
+    <article class="markdown">
+        <h1 id="universal-sampling-better-sampling-for-a-better-tomorrow">Universal sampling: better sampling for a better tomorrow<a href="#universal-sampling-better-sampling-for-a-better-tomorrow">
+    <svg role="img" aria-labelledby="universal-sampling-better-sampling-for-a-better-tomorrow-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="universal-sampling-better-sampling-for-a-better-tomorrow-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h1><p><a href="https://en.wikipedia.org/wiki/Universal_hashing" target="_blank" rel="noopener">Universal hashing</a> is a powerful primitive for statistical analysis at scale. Universal hash functions efficiently and deterministically map inputs to integers that are uniformly distributed within the binary range of an integer type (e.g., a 64-bit long).</p>
+<p>Why would you want to do this? Deterministic sampling allows for complete reproducibility within and between instances of 1 to $\infty$. This allows for completely memoryless and stateless sampling from a dataset or draws from a distribution.</p>
+<ul>
+<li>You can cluster sample in a single pass</li>
+<li>You can sample the same identities in a stream or between different batch runs</li>
+<li>You can efficiently bootstrap and apply computational statistics at scale</li>
+<li>You can build approximate representations of sets or datasets (&ldquo;sketches&rdquo;)</li>
+<li>&hellip;and a lot of other things I&rsquo;m not thinking about right now but you&rsquo;ll eventually discover</li>
+</ul>
+<p>The two universal families that I come across most often for data science, data engineering, and machine learning applications are <a href="https://github.com/aappleby/smhasher" target="_blank" rel="noopener">MurmurHash</a> and <a href="https://github.com/Cyan4973/xxHash" target="_blank" rel="noopener">xxHash</a>:</p>
+<ul>
+<li><code>scikit-learn</code> uses MurmurHash for <a href="https://scikit-learn.org/stable/modules/feature_extraction.html#feature-hashing" target="_blank" rel="noopener">feature hashing via the hashing trick</a></li>
+<li>The Scala standard library includes a <a href="https://www.scala-lang.org/api/2.12.x/scala/util/hashing/MurmurHash3$.html" target="_blank" rel="noopener">MurmurHash implementation</a></li>
+<li>Apache Spark includes functions for both <a href="https://spark.apache.org/docs/latest/api/sql/index.html#hash" target="_blank" rel="noopener">MurmurHash</a> and <a href="https://spark.apache.org/docs/latest/api/sql/index.html#xxhash64" target="_blank" rel="noopener">xxHash</a>. Spark has long used MurmurHash for <a href="https://jaceklaskowski.gitbooks.io/mastering-spark-sql/content/spark-sql-HashPartitioning.html" target="_blank" rel="noopener">hash partitioning</a> to efficiently and uniformly distributed data for computation.</li>
+</ul>
+<p>Universal hashing is by no means limited to these families; MurmurHash and xxHash are particularly relevant to DS/DE/ML work because they are very fast and do not try to meet cryptographic requirements. And there are other hash families in this vein. For example, Snowflake includes an unspecified <a href="https://docs.snowflake.com/en/sql-reference/functions/hash.html" target="_blank" rel="noopener">64-bit uniform hash function</a>.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> hashlib
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> scipy <span style="color:#f92672">import</span> stats
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.utils.murmurhash <span style="color:#f92672">import</span> murmurhash3_32
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Union
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> uuid <span style="color:#f92672">import</span> uuid4
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>random_state <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>RandomState(<span style="color:#ae81ff">12345</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">%</span>matplotlib inline</span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>INT_MIN <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>int32(<span style="color:#f92672">-</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">31</span>))
+</span></span><span style="display:flex;"><span>INT_MAX <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>int32(<span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">31</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>INT_RANGE <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>int64(<span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_mmhash_ufunc <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>frompyfunc(murmurhash3_32, nin<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, nout<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">mmhash</span>(values):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Wrapper for sklearn&#39;s MurmurHash that accepts most types&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> np<span style="color:#f92672">.</span>ndim(values):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> np<span style="color:#f92672">.</span>issubdtype(values<span style="color:#f92672">.</span>dtype, np<span style="color:#f92672">.</span>int32):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> murmurhash3_32(values)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _mmhash_ufunc(values<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>bytes_))<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(values, (bytes, str, np<span style="color:#f92672">.</span>int32)):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> murmurhash3_32(values)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> _mmhash_ufunc(np<span style="color:#f92672">.</span>array(values, dtype<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>bytes_))</span></span></code></pre></div>
+<h2 id="hashing">Hashing<a href="#hashing">
+    <svg role="img" aria-labelledby="hashing-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="hashing-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>Let&rsquo;s take a look at universal hashing in Python with <code>scikit-learn</code>&rsquo;s MurmurHash implementation. For example inputs, I create integer range and random normal arrays and hash their values. Despite the differences in the input distributions, each value in each array is unique so the hash values of both are approximately uniformly distributed in the 32-bit signed range $\left[ -2^{31}, 2^{31} \right)$.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>n <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>integers <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(n, dtype<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>normals <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>normal(size<span style="color:#f92672">=</span>n)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> len(set(integers)) <span style="color:#f92672">==</span> n
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> len(set(normals)) <span style="color:#f92672">==</span> n
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>integer_hashes <span style="color:#f92672">=</span> mmhash(integers)
+</span></span><span style="display:flex;"><span>normal_hashes <span style="color:#f92672">=</span> mmhash(normals)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> len(set(integer_hashes)) <span style="color:#f92672">==</span> n
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> len(set(normal_hashes)) <span style="color:#f92672">==</span> n
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> all(integer_hashes <span style="color:#f92672">!=</span> normal_hashes)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots(ncols<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, nrows<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i, x <span style="color:#f92672">in</span> enumerate([integers, integer_hashes, normals, normal_hashes]):
+</span></span><span style="display:flex;"><span>    ax[i <span style="color:#f92672">//</span> <span style="color:#ae81ff">2</span>, i <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>hist(x)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Values&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Hashes&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_ylabel(<span style="color:#e6db74">&#34;Integer range&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_ylabel(<span style="color:#e6db74">&#34;Random normal&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig<span style="color:#f92672">.</span>tight_layout();</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_6_0.png"
+	width="629"
+	height="470"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<p>These hashes are uniformly distributed in this range because each bit is randomly activated.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>bytes_righty <span style="color:#f92672">=</span> integer_hashes<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#34;uint32&#34;</span>)<span style="color:#f92672">.</span>view(<span style="color:#e6db74">&#34;uint8&#34;</span>)<span style="color:#f92672">.</span>reshape(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># double check that i have the ops right</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> all(
+</span></span><span style="display:flex;"><span>    integer_hashes<span style="color:#f92672">.</span>astype(<span style="color:#e6db74">&#34;uint32&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">==</span> np<span style="color:#f92672">.</span>bitwise_or<span style="color:#f92672">.</span>reduce(np<span style="color:#f92672">.</span>left_shift(bytes_righty, np<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>)<span style="color:#f92672">.</span>T)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>bytes_lefty <span style="color:#f92672">=</span> bytes_righty[:, ::<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>bits <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>unpackbits(bytes_lefty)<span style="color:#f92672">.</span>reshape(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">32</span>)</span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>bits<span style="color:#f92672">.</span>mean()</span></span></code></pre></div>
+<pre><code>0.500484375
+</code></pre>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots()
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>hist(bits<span style="color:#f92672">.</span>sum(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Active bits per hash&#34;</span>);</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_10_0.png"
+	width="561"
+	height="433"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<p>If you&rsquo;re in an environment without these fast non-cryptographic hash functions, remember that cryptographic functions provide you many random bytes. For example, we can take the last 4 bytes of MD5 hashes (8 hex characters).</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>md5_randint <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(
+</span></span><span style="display:flex;"><span>    [int(hashlib<span style="color:#f92672">.</span>md5(bytes(value))<span style="color:#f92672">.</span>hexdigest()[<span style="color:#f92672">-</span><span style="color:#ae81ff">8</span>:], <span style="color:#ae81ff">16</span>) <span style="color:#66d9ef">for</span> value <span style="color:#f92672">in</span> integers],
+</span></span><span style="display:flex;"><span>    dtype<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>uint32,
+</span></span><span style="display:flex;"><span>)<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)</span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots()
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>hist(md5_randint)
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Distribution of truncated MD5 hashes&#34;</span>);</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_13_0.png"
+	width="561"
+	height="451"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<h2 id="random-sampling">Random sampling<a href="#random-sampling">
+    <svg role="img" aria-labelledby="random-sampling-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="random-sampling-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><div class="alert alert-block alert-info" > I'm going to compare the <code>pandas</code> sampling interface with universal sampling. The <code>pandas</code> interface is generally representative of the tools I'm familiar with (PySpark, R base/<code>dplyr</code>, SQL, etc.). It would not surprise me to learn that there are some richer implementations that don't have some of the downsides I'll point out below. </div> 
+<p>The simplest application of universal hashing is random sampling. We start with a representative dataframe of users, individual activity, and scores.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>users <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>avg_posts_per_user <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(
+</span></span><span style="display:flex;"><span>    [
+</span></span><span style="display:flex;"><span>        (user_id, activity_id, score)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> user_id, posts <span style="color:#f92672">in</span> zip(
+</span></span><span style="display:flex;"><span>            random_state<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">7</span>, users),
+</span></span><span style="display:flex;"><span>            random_state<span style="color:#f92672">.</span>poisson(avg_posts_per_user, users),
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> activity_id, score <span style="color:#f92672">in</span> enumerate(random_state<span style="color:#f92672">.</span>normal(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, posts))
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    columns<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;user_id&#34;</span>, <span style="color:#e6db74">&#34;activity_sequence&#34;</span>, <span style="color:#e6db74">&#34;score&#34;</span>],
+</span></span><span style="display:flex;"><span>)</span></span></code></pre></div>
+<p>Dataframes in various packages or platforms usually make <em>simple</em> random sampling very easy.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample_rate <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.15</span>
+</span></span><span style="display:flex;"><span>df<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate)<span style="color:#f92672">.</span>head()</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>activity_sequence</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>21641</th>
+      <td>9551227</td>
+      <td>5</td>
+      <td>-1.365766</td>
+    </tr>
+    <tr>
+      <th>35615</th>
+      <td>3699212</td>
+      <td>0</td>
+      <td>0.301932</td>
+    </tr>
+    <tr>
+      <th>12581</th>
+      <td>6592903</td>
+      <td>2</td>
+      <td>1.423858</td>
+    </tr>
+    <tr>
+      <th>26940</th>
+      <td>1387417</td>
+      <td>5</td>
+      <td>-2.078581</td>
+    </tr>
+    <tr>
+      <th>40928</th>
+      <td>7961711</td>
+      <td>4</td>
+      <td>-0.128853</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>Reproducibility is controlled through seeds for random numbers. Given identical inputs, this method provides reproducible sample by row.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample0 <span style="color:#f92672">=</span> df<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">2323</span>)
+</span></span><span style="display:flex;"><span>sample1 <span style="color:#f92672">=</span> df<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">2323</span>)
+</span></span><span style="display:flex;"><span>sample0<span style="color:#f92672">.</span>equals(sample1)</span></span></code></pre></div>
+<pre><code>True
+</code></pre>
+<p>More general forms of random sampling are usually inconvenient. For example, sampling half of our users requires deduplicating the users and sampling from that set, then filtering the original data.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>(df[[<span style="color:#e6db74">&#34;user_id&#34;</span>]]<span style="color:#f92672">.</span>drop_duplicates()<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate)<span style="color:#f92672">.</span>merge(df)<span style="color:#f92672">.</span>head())</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>activity_sequence</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>7690570</td>
+      <td>0</td>
+      <td>-0.251423</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>7690570</td>
+      <td>1</td>
+      <td>0.211120</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>7690570</td>
+      <td>2</td>
+      <td>-0.696077</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>7690570</td>
+      <td>3</td>
+      <td>0.102993</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>7690570</td>
+      <td>4</td>
+      <td>0.227273</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>And there is no answer to sampling from non-identical inputs: these dataframe methods are based on random numbers drawn independently of the data.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample0 <span style="color:#f92672">=</span> df<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">2323</span>)
+</span></span><span style="display:flex;"><span>sample1 <span style="color:#f92672">=</span> df<span style="color:#f92672">.</span>iloc[::<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">2323</span>)
+</span></span><span style="display:flex;"><span>sample0<span style="color:#f92672">.</span>equals(sample1<span style="color:#f92672">.</span>iloc[::<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])</span></span></code></pre></div>
+<pre><code>False
+</code></pre>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>users <span style="color:#f92672">=</span> df[[<span style="color:#e6db74">&#34;user_id&#34;</span>]]<span style="color:#f92672">.</span>drop_duplicates(ignore_index<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>sample0 <span style="color:#f92672">=</span> users<span style="color:#f92672">.</span>iloc[:<span style="color:#ae81ff">1000</span>]<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">2323</span>)
+</span></span><span style="display:flex;"><span>sample1 <span style="color:#f92672">=</span> users<span style="color:#f92672">.</span>iloc[<span style="color:#ae81ff">500</span>:<span style="color:#ae81ff">1500</span>]<span style="color:#f92672">.</span>sample(frac<span style="color:#f92672">=</span>sample_rate, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">2323</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>l <span style="color:#f92672">=</span> sample0<span style="color:#f92672">.</span>merge(users<span style="color:#f92672">.</span>iloc[<span style="color:#ae81ff">500</span>:<span style="color:#ae81ff">1000</span>])
+</span></span><span style="display:flex;"><span>r <span style="color:#f92672">=</span> sample1<span style="color:#f92672">.</span>merge(users<span style="color:#f92672">.</span>iloc[<span style="color:#ae81ff">500</span>:<span style="color:#ae81ff">1000</span>])
+</span></span><span style="display:flex;"><span>l<span style="color:#f92672">.</span>merge(r, how<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;outer&#34;</span>, indicator<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)<span style="color:#f92672">.</span>groupby(<span style="color:#e6db74">&#34;_merge&#34;</span>)<span style="color:#f92672">.</span>count()</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+    </tr>
+    <tr>
+      <th>_merge</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>left_only</th>
+      <td>69</td>
+    </tr>
+    <tr>
+      <th>right_only</th>
+      <td>67</td>
+    </tr>
+    <tr>
+      <th>both</th>
+      <td>7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>The kinds of problems can be addressed with universal sampling. For a hash function $f_{[a,b)}$ producing hash values $h_i \in \left[a, b \right)$ and sample rate $r$, we transform the rate to a ceiling value such that we keep $h_i &lt; \left( a + r * (b - a) \right)$.</p>
+<p>We can still do independent sampling based on a value that&rsquo;s unique to a row (here just the row number).</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample_ceiling <span style="color:#f92672">=</span> INT_MIN <span style="color:#f92672">+</span> int(sample_rate <span style="color:#f92672">*</span> INT_RANGE)
+</span></span><span style="display:flex;"><span>df[df<span style="color:#f92672">.</span>index<span style="color:#f92672">.</span>map(mmhash) <span style="color:#f92672">&lt;</span> sample_ceiling]<span style="color:#f92672">.</span>head()</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>activity_sequence</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>4458669</td>
+      <td>1</td>
+      <td>-0.108092</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>4521687</td>
+      <td>5</td>
+      <td>-0.744671</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>4521687</td>
+      <td>6</td>
+      <td>-0.644479</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>9627518</td>
+      <td>2</td>
+      <td>0.377447</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>7517891</td>
+      <td>0</td>
+      <td>-0.723131</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>Sampling all data for a subset of users is as simple as changing the input to the hash function.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>df[mmhash(df[<span style="color:#e6db74">&#34;user_id&#34;</span>]) <span style="color:#f92672">&lt;</span> sample_ceiling]<span style="color:#f92672">.</span>head()</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>activity_sequence</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>27</th>
+      <td>2371857</td>
+      <td>0</td>
+      <td>1.699181</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>2371857</td>
+      <td>1</td>
+      <td>0.018043</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>2371857</td>
+      <td>2</td>
+      <td>0.552085</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>2371857</td>
+      <td>3</td>
+      <td>0.775177</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>2371857</td>
+      <td>4</td>
+      <td>-1.122306</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>The properties of universal hash functions allow us to sample from non-identical data, such as a stream or distributed dataset. For example, we can sample the same users from differing subsets.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>users <span style="color:#f92672">=</span> df[[<span style="color:#e6db74">&#34;user_id&#34;</span>]]<span style="color:#f92672">.</span>drop_duplicates(ignore_index<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>batch0 <span style="color:#f92672">=</span> users<span style="color:#f92672">.</span>iloc[:<span style="color:#ae81ff">1000</span>]
+</span></span><span style="display:flex;"><span>batch1 <span style="color:#f92672">=</span> users<span style="color:#f92672">.</span>iloc[<span style="color:#ae81ff">500</span>:<span style="color:#ae81ff">1500</span>]
+</span></span><span style="display:flex;"><span>overlap <span style="color:#f92672">=</span> users<span style="color:#f92672">.</span>iloc[<span style="color:#ae81ff">500</span>:<span style="color:#ae81ff">1000</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>l <span style="color:#f92672">=</span> batch0[mmhash(batch0[<span style="color:#e6db74">&#34;user_id&#34;</span>]) <span style="color:#f92672">&lt;</span> sample_ceiling]
+</span></span><span style="display:flex;"><span>r <span style="color:#f92672">=</span> batch1[mmhash(batch1[<span style="color:#e6db74">&#34;user_id&#34;</span>]) <span style="color:#f92672">&lt;</span> sample_ceiling]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>(
+</span></span><span style="display:flex;"><span>    l<span style="color:#f92672">.</span>merge(r, how<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;outer&#34;</span>, indicator<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">.</span>merge(overlap)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">.</span>groupby(<span style="color:#e6db74">&#34;_merge&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">.</span>count()
+</span></span><span style="display:flex;"><span>)</span></span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+    </tr>
+    <tr>
+      <th>_merge</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>left_only</th>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>right_only</th>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>both</th>
+      <td>59</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<h3 id="multiple-hash-functions">Multiple hash functions<a href="#multiple-hash-functions">
+    <svg role="img" aria-labelledby="multiple-hash-functions-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="multiple-hash-functions-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h3><p>A single hash function deterministically maps an input. Sometimes we want a different hash function. For example, we don&rsquo;t want to sample the same set of users for every analysis. This is particularly relevant for universal sampling from distributions because pseudo-random number generation algorithms often require multiple seed inputs.</p>
+<p>The easiest way to change a hash function is to salt the input. For example, any operation that produces a new, unique value not equal to the input will yield a new, uncorrelated hash. Such an operation includes the hash function itself.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>np<span style="color:#f92672">.</span>corrcoef(mmhash(integers), mmhash(integers <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>))[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>]</span></span></code></pre></div>
+<pre><code>0.019064228610620258
+</code></pre>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>np<span style="color:#f92672">.</span>corrcoef(mmhash(integers), mmhash(mmhash(integers)))[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>]</span></span></code></pre></div>
+<pre><code>-0.006641027550636121
+</code></pre>
+<p>For hash functions that accept multiple inputs, the salt can just be another argument. This is an equivalent strategy to the above: we&rsquo;re essentially converting the original input to bytes (if it wasn&rsquo;t already) and appending salting bytes.</p>
+<p>Repeated hashing is computationally expensive, can be error-prone (using an incorrect salting method), and can introduce serialized computation. This can outweigh its benefits (simplicity and strong guarantees) with large datasets or many hash functions. In practice, we can produce new pseudorandom numbers by integer multiplication with random numbers from the same discrete uniform distribution.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">randomize_hashes</span>(hashes, k, random_seed):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Randomize hash values k times&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    hashes <span style="color:#f92672">=</span> hashes<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    random_state <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>RandomState(random_seed)
+</span></span><span style="display:flex;"><span>    random_integers <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>randint(INT_MIN, INT_MAX, k, np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> np<span style="color:#f92672">.</span>multiply<span style="color:#f92672">.</span>outer(hashes, random_integers)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>np<span style="color:#f92672">.</span>corrcoef(
+</span></span><span style="display:flex;"><span>    np<span style="color:#f92672">.</span>vstack(
+</span></span><span style="display:flex;"><span>        [
+</span></span><span style="display:flex;"><span>            integer_hashes,
+</span></span><span style="display:flex;"><span>            randomize_hashes(integer_hashes, k<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>, random_seed<span style="color:#f92672">=</span><span style="color:#ae81ff">858623</span>)<span style="color:#f92672">.</span>T,
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>)[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>:]</span></span></code></pre></div>
+<pre><code>array([ 0.0010438 ,  0.0122731 ,  0.00666873, -0.00060876,  0.01207721])
+</code></pre>
+<h3 id="universal-sampling-from-the-uniform-distribution">Universal sampling from the uniform distribution<a href="#universal-sampling-from-the-uniform-distribution">
+    <svg role="img" aria-labelledby="universal-sampling-from-the-uniform-distribution-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="universal-sampling-from-the-uniform-distribution-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h3><p>Suppose we want a value from a uniform distribution. Well, the universal hash functions describe above produce such a pseudo-random value.</p>
+<p>Mapping the hash value to arbitrary discrete and continuous uniform distributions is trivial:</p>
+<ul>
+<li>A hash value $h$ can be mapped to an arbitrary discrete uniform $U \lbrace a, b \rbrace$ by $ \left[ h \mod (b - a) \right] + a $, where $\text{mod}$ is the positive modulo operator</li>
+<li>A hash function $f$ with bits $b$ produces a hash value $h$ that can be mapped to an arbitrary continuous uniform $U \left[a, b \right]$ by $ \left( \dfrac{h}{2^b} + \begin{cases} .5 &amp; \text{if}\ f\ \text{is signed} \ 0  &amp; \text{if}\ f\ \text{is unsigned} \end{cases} \right) \cdot (b - a) + a $</li>
+</ul>
+<h3 id="universal-sampling-from-the-normal-distribution">Universal sampling from the normal distribution<a href="#universal-sampling-from-the-normal-distribution">
+    <svg role="img" aria-labelledby="universal-sampling-from-the-normal-distribution-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="universal-sampling-from-the-normal-distribution-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h3><p><a href="https://en.wikipedia.org/wiki/Normal_distribution#Generating_values_from_normal_distribution" target="_blank" rel="noopener">There are several ways to generate values from the normal distribution that leverage samples from the uniform distribution</a>. According to the <a href="https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution#Approximating_a_Normal_distribution" target="_blank" rel="noopener">Irwin-Hall distribution</a>, the scaled, centered sum of 12 random uniform values is approximately normally distributed. This is trivial to implement and is accurate enough for most applied work.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>n <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># distinct hashes for those distinct values</span>
+</span></span><span style="display:flex;"><span>hashes <span style="color:#f92672">=</span> mmhash(normals)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># approximate a normal from the hashes</span>
+</span></span><span style="display:flex;"><span>irwin_hall_approx <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>    randomize_hashes(hashes, k<span style="color:#f92672">=</span><span style="color:#ae81ff">12</span>, random_seed<span style="color:#f92672">=</span><span style="color:#ae81ff">73529</span>) <span style="color:#f92672">/</span> INT_RANGE
+</span></span><span style="display:flex;"><span>)<span style="color:#f92672">.</span>sum(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># visualize</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">2</span>, sharex<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>bins <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>histogram_bin_edges(np<span style="color:#f92672">.</span>r_[normals, irwin_hall_approx], bins<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Random normal&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>hist(normals, bins<span style="color:#f92672">=</span>bins)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Irwin-Hall approximation&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>hist(irwin_hall_approx, bins<span style="color:#f92672">=</span>bins)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>sharex(ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>sharey(ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Joint distribution&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>hist2d(normals, irwin_hall_approx, bins<span style="color:#f92672">=</span>bins, cmap<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;inferno&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig<span style="color:#f92672">.</span>delaxes(ax[<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>plt<span style="color:#f92672">.</span>tight_layout();</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_38_0.png"
+	width="630"
+	height="470"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<p>As long as an evaluation uses the same random integers for permutation, this opens the benefits of universal hashing to random normal sampling: completely independent and deterministic sampling for every distinct input to the hash function.</p>
+<p>More exact samples can be generated by converting the hashes to continuous uniform samples (discussed above), including the non-iterative <a href="https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform" target="_blank" rel="noopener">Box-Muller transform</a>.</p>
+<p>More approximate samples can be generated with inverse transform sampling, which we used below for Poisson sampling.</p>
+<h3 id="universal-sampling-from-the-poisson-distribution">Universal sampling from the Poisson distribution<a href="#universal-sampling-from-the-poisson-distribution">
+    <svg role="img" aria-labelledby="universal-sampling-from-the-poisson-distribution-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="universal-sampling-from-the-poisson-distribution-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h3><p>The Poisson distribution is well-suited for <a href="https://en.wikipedia.org/wiki/Inverse_transform_sampling" target="_blank" rel="noopener">inverse transform sampling</a> when <a href="https://en.wikipedia.org/wiki/Poisson_distribution#Random_variate_generation" target="_blank" rel="noopener">the value of $\lambda$ (the mean of the distribution) is relatively small</a>. Given the most common uses of the random the Poisson use such small $\lambda$ values, inverse transformation can be our default method for Poisson universal sampling.</p>
+<p>The inverse transform method simply relates values of the cumulative distribution function to values of the distribution. In discrete cases, starting at zero this can be simplified to a single array where the index represents the value from the distribution.</p>
+<p>For index-based inverse transforms, we can simply evaluate inverse CDF within our tolerated range. For our small values of $\lambda$, in the Poisson distribution, the lower bound of this range will be zero. Index edges are inversely mapping the CDF values along this range to the range of our hash values.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">poisson_sampling</span>(hashes, lam, tol<span style="color:#f92672">=</span><span style="color:#ae81ff">1e-12</span>):
+</span></span><span style="display:flex;"><span>    pois <span style="color:#f92672">=</span> stats<span style="color:#f92672">.</span>poisson(lam)
+</span></span><span style="display:flex;"><span>    lower, upper <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>ceil(pois<span style="color:#f92672">.</span>isf([<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> tol, tol]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    edges <span style="color:#f92672">=</span> (pois<span style="color:#f92672">.</span>cdf(np<span style="color:#f92672">.</span>arange(lower, upper)) <span style="color:#f92672">*</span> INT_RANGE <span style="color:#f92672">+</span> INT_MIN)<span style="color:#f92672">.</span>astype(
+</span></span><span style="display:flex;"><span>        np<span style="color:#f92672">.</span>int32
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    poisson <span style="color:#f92672">=</span> pois<span style="color:#f92672">.</span>rvs(size<span style="color:#f92672">=</span>len(hashes), random_state<span style="color:#f92672">=</span>random_state)
+</span></span><span style="display:flex;"><span>    univseral_poisson <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>searchsorted(edges, hashes, side<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;right&#34;</span>) <span style="color:#f92672">+</span> lower
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots()
+</span></span><span style="display:flex;"><span>    num_bins <span style="color:#f92672">=</span> int(min(max(poisson<span style="color:#f92672">.</span>max(), univseral_poisson<span style="color:#f92672">.</span>max()) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">30</span>))
+</span></span><span style="display:flex;"><span>    _, bins, _ <span style="color:#f92672">=</span> ax<span style="color:#f92672">.</span>hist(
+</span></span><span style="display:flex;"><span>        poisson, bins<span style="color:#f92672">=</span>num_bins, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;SciPy samples&#34;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    ax<span style="color:#f92672">.</span>hist(univseral_poisson, bins<span style="color:#f92672">=</span>bins, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Universal samples&#34;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)
+</span></span><span style="display:flex;"><span>    ax<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Samples from the Pois(</span><span style="color:#e6db74">{</span>lam<span style="color:#e6db74">}</span><span style="color:#e6db74">) distribution&#34;</span>)
+</span></span><span style="display:flex;"><span>    ax<span style="color:#f92672">.</span>legend()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>poisson_sampling(integer_hashes, <span style="color:#ae81ff">2</span>)</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_41_0.png"
+	width="561"
+	height="433"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<p>This method is still perfectly valid with values of $\lambda$ much larger than typically used, but it may be computationally inefficient.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>poisson_sampling(integer_hashes, <span style="color:#ae81ff">10000</span>)</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_43_0.png"
+	width="572"
+	height="433"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<h2 id="universal-sampling-from-arbitrary-distributions-via-approximate-inverse-transformation">Universal sampling from arbitrary distributions via approximate inverse transformation<a href="#universal-sampling-from-arbitrary-distributions-via-approximate-inverse-transformation">
+    <svg role="img" aria-labelledby="universal-sampling-from-arbitrary-distributions-via-approximate-inverse-transformation-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="universal-sampling-from-arbitrary-distributions-via-approximate-inverse-transformation-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>Every distribution will have a best method for generating random values from universal hash seeds. In practice, these won&rsquo;t always be tractable or even possible (e.g., infrastructure constraints).</p>
+<p>Inverse transformation provides a general method of approximation in these cases. The approach is simple:</p>
+<ol>
+<li>Evenly divide the (0, 1) interval</li>
+<li>Calculate the quantile at each value in the interval</li>
+<li>Integerize the interval to the hash range</li>
+<li>Use the insertion position of hash values into the interval array to choose the quantile, breaking ties by choosing the quantile closest to the median</li>
+<li>If continuous, use a second hash function to interpolate within the quantile</li>
+</ol>
+<p>The precision of the approximation is controlled by the size of the lookup table we&rsquo;re willing to create.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">inverse_approximation</span>(
+</span></span><span style="display:flex;"><span>    hashes,
+</span></span><span style="display:flex;"><span>    distribution,
+</span></span><span style="display:flex;"><span>    tol<span style="color:#f92672">=</span><span style="color:#ae81ff">1e-12</span>,
+</span></span><span style="display:flex;"><span>    table_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>,
+</span></span><span style="display:flex;"><span>    randomize<span style="color:#f92672">=-</span><span style="color:#ae81ff">860787389</span>,
+</span></span><span style="display:flex;"><span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># cdf is full linear space in the tolerance range</span>
+</span></span><span style="display:flex;"><span>    cdf <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>linspace(tol, <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> tol, table_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># values are evaluated at the CDF and padded with inf</span>
+</span></span><span style="display:flex;"><span>    values <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>r_[<span style="color:#f92672">-</span>np<span style="color:#f92672">.</span>inf, distribution<span style="color:#f92672">.</span>isf(cdf[::<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]), np<span style="color:#f92672">.</span>inf]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># edges are the integerized cdf</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># padded with the extrema to match size of values</span>
+</span></span><span style="display:flex;"><span>    unpadded <span style="color:#f92672">=</span> (cdf <span style="color:#f92672">*</span> INT_RANGE <span style="color:#f92672">+</span> INT_MIN)<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    edges <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>r_[INT_MIN, unpadded, INT_MAX]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># get index in edges for the hashes</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># choose the side closer to the center</span>
+</span></span><span style="display:flex;"><span>    index <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>where(
+</span></span><span style="display:flex;"><span>        hashes <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        np<span style="color:#f92672">.</span>searchsorted(edges, hashes, side<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;right&#34;</span>),
+</span></span><span style="display:flex;"><span>        np<span style="color:#f92672">.</span>searchsorted(edges, hashes),
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    samples <span style="color:#f92672">=</span> distribution<span style="color:#f92672">.</span>rvs(size<span style="color:#f92672">=</span>len(hashes), random_state<span style="color:#f92672">=</span>random_state)
+</span></span><span style="display:flex;"><span>    inverse_samples <span style="color:#f92672">=</span> values[index]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(distribution, stats<span style="color:#f92672">.</span>rv_continuous):
+</span></span><span style="display:flex;"><span>        between_values <span style="color:#f92672">=</span> values[np<span style="color:#f92672">.</span>where(hashes <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>, index <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, index <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)]
+</span></span><span style="display:flex;"><span>        min_ <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>minimum(inverse_samples, between_values)
+</span></span><span style="display:flex;"><span>        max_ <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>maximum(inverse_samples, between_values)
+</span></span><span style="display:flex;"><span>        interp <span style="color:#f92672">=</span> hashes <span style="color:#f92672">*</span> randomize <span style="color:#f92672">/</span> INT_RANGE <span style="color:#f92672">+</span> <span style="color:#ae81ff">0.5</span>
+</span></span><span style="display:flex;"><span>        inverse_samples <span style="color:#f92672">+=</span> (max_ <span style="color:#f92672">-</span> min_) <span style="color:#f92672">*</span> interp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots()
+</span></span><span style="display:flex;"><span>    num_bins <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(distribution, stats<span style="color:#f92672">.</span>rv_discrete):
+</span></span><span style="display:flex;"><span>        _ <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>r_[samples, inverse_samples]
+</span></span><span style="display:flex;"><span>        sample_range <span style="color:#f92672">=</span> _<span style="color:#f92672">.</span>max() <span style="color:#f92672">-</span> _<span style="color:#f92672">.</span>min()
+</span></span><span style="display:flex;"><span>        num_bins <span style="color:#f92672">=</span> min(<span style="color:#ae81ff">30</span>, sample_range)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    _, bins, _ <span style="color:#f92672">=</span> ax<span style="color:#f92672">.</span>hist(
+</span></span><span style="display:flex;"><span>        samples, bins<span style="color:#f92672">=</span>num_bins, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;SciPy samples&#34;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    ax<span style="color:#f92672">.</span>hist(inverse_samples, bins<span style="color:#f92672">=</span>bins, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Universal samples&#34;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)
+</span></span><span style="display:flex;"><span>    ax<span style="color:#f92672">.</span>legend()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> ax</span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>ax <span style="color:#f92672">=</span> inverse_approximation(integer_hashes, stats<span style="color:#f92672">.</span>poisson(<span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">6</span>))
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Approximate samples from Pois($10^6$)&#34;</span>);</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_46_0.png"
+	width="569"
+	height="457"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>ax <span style="color:#f92672">=</span> inverse_approximation(integer_hashes, stats<span style="color:#f92672">.</span>norm(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>))
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Approximate samples from N(10, 10)&#34;</span>);</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_47_0.png"
+	width="561"
+	height="433"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>ax <span style="color:#f92672">=</span> inverse_approximation(integer_hashes, stats<span style="color:#f92672">.</span>gamma(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>ax<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Approximate samples from $\Gamma(1, 2)$&#34;</span>);</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/universal-sampling/images/output_48_0.png"
+	width="561"
+	height="435"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<h2 id="wrapping-up">Wrapping up<a href="#wrapping-up">
+    <svg role="img" aria-labelledby="wrapping-up-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="wrapping-up-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>The immediate applications of universal sampling from data are evident. It may be less clear why you might care about universal sampling from distributions. If you noticed that I didn&rsquo;t cover sampling with replacement, there is at least one very important application of sampling from distributions that I&rsquo;ll cover in my next post: Poisson resampling and bootstrap.</p>
+
+    </article>
+    <aside>
+      <div class="single-terms">
+        
+          
+          <a class="term" href="https://ptrcknchlsn.xyz/tags/big-data/">big data</a></li>
+          
+        
+      </div>
+      
+  
+  
+  
+
+  <section>
+    <h2>Share</h2>
+    <div class="social-links">
+      <ul class="social-icons--share">
+        
+        
+        
+        
+        
+        
+        
+        
+        <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fptrcknchlsn.xyz%2fposts%2funiversal-sampling%2f&amp;source=https%3a%2f%2fptrcknchlsn.xyz%2fposts%2funiversal-sampling%2f&amp;title=Universal%20sampling%3a%20better%20sampling%20for%20a%20better%20tomorrow&amp;summary=Universal%20sampling%3a%20better%20sampling%20for%20a%20better%20tomorrow" target="_blank" rel="noopener" aria-label="Share on LinkedIn" class="social-btn linkedin">
+          <li><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-linkedin" width="24" height="24" viewBox="0 0 352 352" fill="var(--color-primary)"><path d="M0,40v272c0,21.9,18.1,40,40,40h272c21.9,0,40-18.1,40-40V40c0-21.9-18.1-40-40-40H40C18.1,0,0,18.1,0,40z M312,32 c4.6,0,8,3.4,8,8v272c0,4.6-3.4,8-8,8H40c-4.6,0-8-3.4-8-8V40c0-4.6,3.4-8,8-8H312z M59.5,87c0,15.2,12.3,27.5,27.5,27.5 c15.2,0,27.5-12.3,27.5-27.5c0-15.2-12.3-27.5-27.5-27.5C71.8,59.5,59.5,71.8,59.5,87z M187,157h-1v-21h-45v152h47v-75 c0-19.8,3.9-39,28.5-39c24.2,0,24.5,22.4,24.5,40v74h47v-83.5c0-40.9-8.7-72-56.5-72C208.5,132.5,193.3,145.1,187,157z M64,288h47.5 V136H64V288z"/></svg></li>
+        </a>
+        
+        
+        
+        <a href="mailto:?subject=Occasionally%20clever%20-%20Universal%20sampling%3a%20better%20sampling%20for%20a%20better%20tomorrow.&amp;body=Universal%20sampling%3a%20better%20sampling%20for%20a%20better%20tomorrow%2c%20by%20Occasionally%20clever%0aDemonstrates%20and%20advocates%20sampling%20with%20universal%20hash%20functions%0a%0ahttps%3a%2f%2fptrcknchlsn.xyz%2fposts%2funiversal-sampling%2f%0a" target="_blank" class="social-btn email">
+          <li><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-mail" width="24" height="24" viewBox="0 0 416 288" fill="var(--color-primary)"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg></li>
+        </a>
+      </ul>
+    </div>
+  </section>
+  
+        <div class="series">
+          <p>Part of the <a href="https://ptrcknchlsn.xyz/series/universal-sampling/">Universal Sampling</a> series:</p>
+          
+          <ol>
+              <li>Universal sampling: better sampling for a better tomorrow<span class="series-this-post">This post!</span>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-bootstrap/">Universal bootstrap: a superpower</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/">Bootstrapping in SQL; or, getting s--- done with the tools you have</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/visualization-trick/">A visualization trick obvious in hindsight</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-reservoir/">Universal reservoir: sampling a fixed number of elements from unbounded data</a>
+                
+              </li>
+          </ol>
+        </div>
+      
+      
+    </aside>
+  </div>
+</div>
+
+    </main><footer>
+    
+    <div class="section footer">
+      <p class="footer-copyright">&copy; 2023 &middot; 
+        Patrick Nicholson
+        
+      </p>
+      
+        <div class="footer-socials">
+          
+<div class="social-links">
+  <ul class="social-icons">
+    
+    
+
+    
+    
+    <li>
+      <a href="https://github.com/patrick-nicholson" target="_blank" rel="noopener" aria-label="Visit Github profile" class="social-btn github">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-github" width="24" height="24" viewBox="0 0 24 24" fill="var(--color-primary)"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </li>
+    
+
+    
+    
+
+    
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nicholsonpatrick" target="_blank" rel="noopener" aria-label="Visit LinkedIn profile" class="social-btn linkedin">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-linkedin" width="24" height="24" viewBox="0 0 352 352" fill="var(--color-primary)"><path d="M0,40v272c0,21.9,18.1,40,40,40h272c21.9,0,40-18.1,40-40V40c0-21.9-18.1-40-40-40H40C18.1,0,0,18.1,0,40z M312,32 c4.6,0,8,3.4,8,8v272c0,4.6-3.4,8-8,8H40c-4.6,0-8-3.4-8-8V40c0-4.6,3.4-8,8-8H312z M59.5,87c0,15.2,12.3,27.5,27.5,27.5 c15.2,0,27.5-12.3,27.5-27.5c0-15.2-12.3-27.5-27.5-27.5C71.8,59.5,59.5,71.8,59.5,87z M187,157h-1v-21h-45v152h47v-75 c0-19.8,3.9-39,28.5-39c24.2,0,24.5,22.4,24.5,40v74h47v-83.5c0-40.9-8.7-72-56.5-72C208.5,132.5,193.3,145.1,187,157z M64,288h47.5 V136H64V288z"/></svg>
+        </a>
+    </li>
+    
+
+    
+    
+    <li>
+      <a href="mailto:?to=patrick.nicholson%40outlook.com" target="_blank" class="social-btn email">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-mail" width="24" height="24" viewBox="0 0 416 288" fill="var(--color-primary)"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+        </div>
+      
+    </div>
+  </footer>
+
+  
+
+
+
+
+
+
+
+
+  
+  
+    
+
+<script src="https://ptrcknchlsn.xyz/main.min.js"></script>
+
+
+
+  
+</body>
+</html>

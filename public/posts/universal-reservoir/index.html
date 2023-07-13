@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en-us"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+
+<link rel="stylesheet" href="https://ptrcknchlsn.xyz/scss/main.min.css" />
+  
+<meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  
+
+<title>Universal reservoir sampling</title>
+
+
+<meta name="author" content="Patrick Nicholson">
+
+<meta name="description" content="The personal blog of Patrick Nicholson">
+<link rel="canonical" href="https://ptrcknchlsn.xyz/posts/universal-reservoir/">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Universal reservoir sampling">
+<meta property="og:description" content="Reservoir sampling is the process of sampling a fixed number of elements from unbounded data. Universal hash functions provide an efficient, deterministic, and infinitely scalable approach to the reservoir that is easy to implement in any data environment.">
+<meta property="og:url" content="https://ptrcknchlsn.xyz/posts/universal-reservoir/">
+<meta property="article:published_time" content="2023-03-10T00:00:00-05:00">
+  <meta property="article:modified_time" content="2023-07-12T17:44:51-04:00">
+  
+
+<meta property="og:image" content="https://ptrcknchlsn.xyz/posts/universal-reservoir/images/feature.png"/>
+  
+    <meta property="og:image:alt" content="Visualization of a reservoir sample as observations increase" />
+  
+
+
+
+<meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/visualization-trick/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-bootstrap/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-sampling/" />
+
+
+
+<meta name="twitter:title" content="Universal reservoir sampling">
+<meta name="twitter:description" content="Reservoir sampling is the process of sampling a fixed number of elements from unbounded data. Universal hash functions provide an efficient, deterministic, and infinitely scalable approach to the reservoir that is easy to implement in any data environment.">
+
+
+<meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:image" content="https://ptrcknchlsn.xyz/posts/universal-reservoir/images/feature.png"/>
+  
+    <meta name="twitter:image:alt" content="Visualization of a reservoir sample as observations increase">
+  
+
+
+
+
+
+  
+    
+  
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://ptrcknchlsn.xyz/#/schema/person/1",
+      "name": "Patrick Nicholson",
+      "url": "https://ptrcknchlsn.xyz/",
+      "image": {
+        "@type": "ImageObject",
+        "@id": "https://ptrcknchlsn.xyz/#/schema/image/1",
+        "url": "https://ptrcknchlsn.xyz/\u003cnil\u003e",
+        "width": null ,
+        "height": null ,
+        "caption": "Patrick Nicholson"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ptrcknchlsn.xyz/#/schema/website/1",
+      "url": "https://ptrcknchlsn.xyz/",
+      "name": "Occasionally clever",
+      "description": "The personal blog of Patrick Nicholson",
+      "publisher": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/",
+      "url": "https://ptrcknchlsn.xyz/posts/universal-reservoir/",
+      "name": "Universal reservoir: sampling a fixed number of elements from unbounded data",
+      "description": "The personal blog of Patrick Nicholson",
+      "isPartOf": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/website/1"
+      },
+      "about": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+      },
+      "datePublished": "2023-03-10T00:00:00-05:00",
+      "dateModified": "2023-07-12T17:44:51-04:00",
+      "breadcrumb": {
+        "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/#/schema/breadcrumb/1"
+      },
+      "primaryImageOfPage": {
+        "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/#/schema/image/2"
+      },
+      "inLanguage": "en-US",
+      "potentialAction": [{
+        "@type": "ReadAction", "target": ["https://ptrcknchlsn.xyz/posts/universal-reservoir/"]
+      }]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/#/schema/breadcrumb/1",
+      "name": "Breadcrumbs",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "item": {
+          "@type": "WebPage",
+          "@id": "https://ptrcknchlsn.xyz",
+          "url": "https://ptrcknchlsn.xyz",
+          "name": "Home"
+          }
+        },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "item": {
+          "@type": "WebPage",
+          "@id": "https://ptrcknchlsn.xyz/posts/",
+          "url": "https://ptrcknchlsn.xyz/posts/",
+          "name": "Posts"
+          }
+        },{
+        "@type": "ListItem",
+        "position":  4 ,
+        "item": {
+          "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/"
+          }
+        }]
+    },
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://ptrcknchlsn.xyz/#/schema/article/1",
+          "headline": "Universal reservoir: sampling a fixed number of elements from unbounded data",
+          "description": "",
+          "isPartOf": {
+            "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/"
+          },
+          "mainEntityOfPage": {
+            "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/"
+          },
+          "datePublished": "2023-03-10T00:00:00-05:00",
+          "dateModified": "2023-07-12T17:44:51-04:00",
+          "author": {
+            "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+          },          
+          "publisher": {
+            "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+          },
+          "image": {
+            "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/#/schema/image/2"
+          }
+        }
+      ]
+    },{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ImageObject",
+          "@id": "https://ptrcknchlsn.xyz/posts/universal-reservoir/#/schema/image/2",
+          "url": "https://ptrcknchlsn.xyz/posts/universal-reservoir/images/feature.png",
+          "contentUrl": "https://ptrcknchlsn.xyz/posts/universal-reservoir/images/feature.png",
+          "caption": "Visualization of a reservoir sample as observations increase"
+        }
+      ]
+    }
+  ]
+}
+</script>
+  
+
+  
+
+</head><body>
+    <header class="container">
+  <nav class="main-nav" id="js-navbar">
+    
+      <a class="logo" href="https://ptrcknchlsn.xyz">Occasionally clever</a>
+    
+    <ul class="menu" id="js-menu">
+      
+      
+      <li class="menu-item--align">
+        <div class="switch">
+          <input class="switch-input" type="checkbox" id="themeSwitch">
+          <label aria-hidden="true" class="switch-label" for="themeSwitch">On</label>
+          <div aria-hidden="true" class="switch-marker"></div>
+        </div>
+      </li>
+    </ul>
+    <span class="nav-toggle" id="js-navbar-toggle">
+      <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="30" height="30" fill="var(--color-contrast-high)"><rect y="11" width="24" height="2" rx="1"/><rect y="4" width="24" height="2" rx="1"/><rect y="18" width="24" height="2" rx="1"/></svg>
+    </span>
+  </nav>
+</header><main class="section">
+<div class="container">
+  <section class="page-header">
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <h1 class="page-header-title">Universal reservoir: sampling a fixed number of elements from unbounded data</h1>
+    <div class="post-list-meta">
+      <div class="post-list-dates">Posted:
+  Mar 10, 2023&nbsp;&middot;&nbsp;
+    Updated: Jul 12, 2023&nbsp;&middot;&nbsp;8 min.</div>
+      
+      
+    </div>
+    <p class="page-header-desc">
+      <div class="single-feature-img">
+
+
+
+  
+
+
+<img class="feature-image" 
+     srcset="/posts/universal-reservoir/images/feature.png 480w, /posts/universal-reservoir/images/feature.png 800w"
+     sizes="(max-width: 600px) 480px, 800px"
+     src="/posts/universal-reservoir/images/feature.png"
+     alt="Visualization of a reservoir sample as observations increase">
+</div>Reservoir sampling is the process of sampling a fixed number of elements from unbounded data. Universal hash functions provide an efficient, deterministic, and infinitely scalable approach to the reservoir that is easy to implement in any data environment.</p>
+      <div class="series">
+        <p>Part of the <a href="https://ptrcknchlsn.xyz/series/universal-sampling/">Universal Sampling</a> series:</p>
+        
+        <ol class="series-list">
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-sampling/">Universal sampling: better sampling for a better tomorrow</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-bootstrap/">Universal bootstrap: a superpower</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/">Bootstrapping in SQL; or, getting s--- done with the tools you have</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/visualization-trick/">A visualization trick obvious in hindsight</a>
+              
+            </li>
+            <li>Universal reservoir: sampling a fixed number of elements from unbounded data<span class="series-this-post">This post!</span>
+              
+            </li>
+        </ol>
+      </div>
+    
+    
+  </section>
+</div>
+<div class="single-container-post">
+  
+
+  <div class="single-post-contents">
+    
+    
+    <article class="markdown">
+        <h1 id="universal-reservoir-sampling-a-fixed-number-of-elements-from-unbounded-data">Universal reservoir: sampling a fixed number of elements from unbounded data<a href="#universal-reservoir-sampling-a-fixed-number-of-elements-from-unbounded-data">
+    <svg role="img" aria-labelledby="universal-reservoir-sampling-a-fixed-number-of-elements-from-unbounded-data-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="universal-reservoir-sampling-a-fixed-number-of-elements-from-unbounded-data-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h1><p>How would you draw a fixed sample size from a set? You might randomly choose indices in the range of the size of the set, then select the corresponding elements. What if your set is too big to hold all at once? If you know the size of your set, you can determine the sample fraction and sample with it.</p>
+<p>But what if you don&rsquo;t know the size of your set? Or it&rsquo;s so large that getting an exact answer is complicated enough?</p>
+<p>The concept of drawing a fixed number of elements from unbounded data is known as <a href="https://en.wikipedia.org/wiki/Reservoir_sampling" target="_blank" rel="noopener">reservoir sampling</a>. Reservoir techniques provide statistically sound random samples in a single pass with no requirement of <em>a priori</em> knowledge of the size of a sample.</p>
+<p>In <a href="/2023/02/13/universal-sampling/">an earlier post</a>, I covered universal sampling: the use of a universal hash function to make decisions about which elements to choose. In this post, I will cover the universal reservoir: the use of a universal hash function to create a universal sampling procedure.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">%</span>matplotlib inline
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pyarrow.dataset <span style="color:#66d9ef">as</span> ds
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.utils.murmurhash <span style="color:#f92672">import</span> murmurhash3_32 <span style="color:#66d9ef">as</span> _murmurhash3_32
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> timeit <span style="color:#f92672">import</span> timeit
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> tqdm.notebook <span style="color:#f92672">import</span> tqdm
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Iterable
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>INT_MIN <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>int32(<span style="color:#f92672">-</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">31</span>))
+</span></span><span style="display:flex;"><span>INT_MAX <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>int32(<span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">31</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>INT_RANGE <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>int64(<span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>random_state <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>RandomState(<span style="color:#ae81ff">8675309</span>)
+</span></span><span style="display:flex;"><span>_mmhash_ufunc <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>frompyfunc(_murmurhash3_32, nin<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, nout<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">murmurhash</span>(values):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Wrapper for sklearn&#39;s MurmurHash that accepts most types&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> np<span style="color:#f92672">.</span>ndim(values):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> np<span style="color:#f92672">.</span>issubdtype(values<span style="color:#f92672">.</span>dtype, np<span style="color:#f92672">.</span>int32):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> _murmurhash3_32(values)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _mmhash_ufunc(values<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>bytes_))<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(values, (bytes, str, np<span style="color:#f92672">.</span>int32)):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _murmurhash3_32(values)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> _mmhash_ufunc(np<span style="color:#f92672">.</span>array(values, dtype<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>bytes_))</span></span></code></pre></div>
+<h2 id="why-should-we-use-hash-functions-for-reservoir-sampling">Why should we use hash functions for reservoir sampling?<a href="#why-should-we-use-hash-functions-for-reservoir-sampling">
+    <svg role="img" aria-labelledby="why-should-we-use-hash-functions-for-reservoir-sampling-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="why-should-we-use-hash-functions-for-reservoir-sampling-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>Traditional reservoir sampling algorithms work when both of these conditions are met:</p>
+<ol>
+<li>Inputs are independent. For example, simple random sampling of rows or multistage sampling from deduplicated data.</li>
+<li>The desired sample size is small enough to efficiently hold in memory</li>
+</ol>
+<p>This is restrictive in practice. For example, we might want to sample devices from a large stream of advertising data for realtime monitoring and reporting on many different metrics (e.g., by client).</p>
+<ol>
+<li>The data are not independent. We must deduplicate and detect new devices prior to building the reservoir.</li>
+<li>The true sample size is quickly infeasible; it&rsquo;s (sample size per metric) $\times$ (number of metrics). We then find ourselves creating many different reservoirs and streams.</li>
+</ol>
+<p>Universal hash functions mitigate these issues. These functions efficiently and deterministically map inputs to uniformly distributed integers.</p>
+<ol>
+<li>Hash values are the same each time we see a device, so the original stream can be used directly to build a reservoir.</li>
+<li>We don&rsquo;t need to hold the entire reservoir state in memory, so we can easily scale the sample up to the size of the original data.</li>
+</ol>
+<p>Additional benefits include</p>
+<ul>
+<li>insensitivity to data order</li>
+<li>identical approach for different sampling schemes (e.g., simple random sampling and block sampling)</li>
+<li>usable for in-memory data, distributed datasets, batch/minibatch updates, and single-event streams</li>
+</ul>
+<h2 id="a-gentle-introduction">A gentle introduction<a href="#a-gentle-introduction">
+    <svg role="img" aria-labelledby="a-gentle-introduction-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="a-gentle-introduction-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>We start with a small set of values.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>set_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>sample_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>small_set <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(set_size)
+</span></span><span style="display:flex;"><span>random_state<span style="color:#f92672">.</span>shuffle(small_set)</span></span></code></pre></div>
+<p>With small, fixed sets, there is no issue choosing a fixed number of elements.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>choice(small_set, sample_size, replace<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>sample</span></span></code></pre></div>
+<pre><code>array([7015, 4608, 5702, 8678, 2247, 1009, 4134, 6790, 8089, 8914])
+</code></pre>
+<p>We can leverage the properties of universal hash functions to do this as well. Hash values are uncorrelated with inputs and can be ordered. This means we can choose elements based on their hash order statistics.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>hash_order <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>argsort(murmurhash(small_set))
+</span></span><span style="display:flex;"><span>small_set[hash_order <span style="color:#f92672">&lt;</span> sample_size]</span></span></code></pre></div>
+<pre><code>array([ 693, 6495, 3449, 1432,  143, 9687, 2545, 3638, 7704, 7086])
+</code></pre>
+<h2 id="a-more-practical-demonstration">A more practical demonstration<a href="#a-more-practical-demonstration">
+    <svg role="img" aria-labelledby="a-more-practical-demonstration-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="a-more-practical-demonstration-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>The value of reservoir sampling is dealing with unbounded data. We simply need to maintain a sorted set up to our sample size that contains the smallest hash values we&rsquo;ve seen. We sample from our inputs with hash values smaller than the $k$th hash in our state (the maximum hash value in our truncated set).</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HashReservoir</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Simple reservoir of hashes
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    sample_size : int
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        Target size of the reservoir
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, sample_size: int):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>sample_size <span style="color:#f92672">=</span> sample_size
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>hashes <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros(self<span style="color:#f92672">.</span>sample_size, dtype<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>int32) <span style="color:#f92672">+</span> INT_MAX
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">update</span>(self, new_hashes: Iterable[int]):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Update the sorted set of hashes&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        new_hashes <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>setdiff1d(new_hashes, self<span style="color:#f92672">.</span>hashes)[: self<span style="color:#f92672">.</span>sample_size]
+</span></span><span style="display:flex;"><span>        insertion_points <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>searchsorted(self<span style="color:#f92672">.</span>hashes, new_hashes)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>hashes[:] <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>insert(self<span style="color:#f92672">.</span>hashes, insertion_points, new_hashes)[
+</span></span><span style="display:flex;"><span>            : self<span style="color:#f92672">.</span>sample_size
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@property</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">kth_hash</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>hashes[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __repr__(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;HashReservoir(sample_size=</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>sample_size<span style="color:#e6db74">}</span><span style="color:#e6db74">,&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34; kth_hash=</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>kth_hash<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#34;</span>
+</span></span><span style="display:flex;"><span>        )</span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">12</span>
+</span></span><span style="display:flex;"><span>hash_reservoir <span style="color:#f92672">=</span> HashReservoir(sample_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>set_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span>minibatch_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>minibatches <span style="color:#f92672">=</span> set_size <span style="color:#f92672">//</span> minibatch_size
+</span></span><span style="display:flex;"><span>values <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>uniform(size<span style="color:#f92672">=</span>set_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># just for analysis later</span>
+</span></span><span style="display:flex;"><span>states <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((minibatches, sample_size), dtype<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>int32) <span style="color:#f92672">+</span> INT_MAX
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i, minibatch <span style="color:#f92672">in</span> enumerate(np<span style="color:#f92672">.</span>split(values, minibatches)):
+</span></span><span style="display:flex;"><span>    hashes <span style="color:#f92672">=</span> murmurhash(minibatch)
+</span></span><span style="display:flex;"><span>    hash_reservoir<span style="color:#f92672">.</span>update(hashes)
+</span></span><span style="display:flex;"><span>    states[i] <span style="color:#f92672">=</span> hash_reservoir<span style="color:#f92672">.</span>hashes
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>hash_reservoir</span></span></code></pre></div>
+<pre><code>HashReservoir(sample_size=4096, kth_hash=-2129643907)
+</code></pre>
+<p>Interestingly, a hash reservoir also provides a <a href="https://en.wikipedia.org/wiki/Count-distinct_problem#Bottom-m_sketches" target="_blank" rel="noopener">reasonable solution to the count-distinct problem</a>. The $k$th hash is an estimate of the sample rate from the set of all processed hashes. This is the inverse estimator for the number of distinct elements we&rsquo;ve seen. Our relatively small set gives us a relatively small error.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HashReservoir</span>(HashReservoir):
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@property</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sample_rate</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Implied sample rate in the reservoir&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>kth_hash <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>(INT_MIN <span style="color:#f92672">-</span> self<span style="color:#f92672">.</span>kth_hash) <span style="color:#f92672">/</span> INT_RANGE
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>kth_hash <span style="color:#f92672">&lt;</span> INT_MAX:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>kth_hash <span style="color:#f92672">/</span> INT_RANGE <span style="color:#f92672">+</span> <span style="color:#ae81ff">0.5</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@property</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">nunique</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Estimated distinct elements in inputs to reservoir&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>kth_hash <span style="color:#f92672">&lt;</span> INT_MAX:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>sample_size <span style="color:#f92672">/</span> self<span style="color:#f92672">.</span>sample_rate
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> np<span style="color:#f92672">.</span>float64((self<span style="color:#f92672">.</span>kth_hash <span style="color:#f92672">&lt;</span> INT_MAX)<span style="color:#f92672">.</span>sum())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">maybe_scalar</span>(array):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Unwrap a scalar value from an array&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> np<span style="color:#f92672">.</span>ndim(array):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> array
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> array<span style="color:#f92672">.</span>item()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sample_rate</span>(kth_hashes):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Implied sample rate for one or more kth hashes&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    rates <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>where(
+</span></span><span style="display:flex;"><span>        kth_hashes <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-</span>(INT_MIN <span style="color:#f92672">-</span> kth_hashes) <span style="color:#f92672">/</span> INT_RANGE,
+</span></span><span style="display:flex;"><span>        kth_hashes <span style="color:#f92672">/</span> INT_RANGE <span style="color:#f92672">+</span> <span style="color:#ae81ff">0.5</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> maybe_scalar(rates)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">approx_nunique</span>(kth_hashes, sample_size):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Estimated (only, never exact) distinct elements for one or more kth hashes&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    approx <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>where(
+</span></span><span style="display:flex;"><span>        kth_hashes <span style="color:#f92672">&lt;</span> INT_MAX,
+</span></span><span style="display:flex;"><span>        sample_size <span style="color:#f92672">/</span> sample_rate(kth_hashes),
+</span></span><span style="display:flex;"><span>        np<span style="color:#f92672">.</span>nan,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> maybe_scalar(approx)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>hash_reservoir<span style="color:#f92672">.</span>__class__ <span style="color:#f92672">=</span> HashReservoir
+</span></span><span style="display:flex;"><span>hash_reservoir<span style="color:#f92672">.</span>nunique, np<span style="color:#f92672">.</span>log(hash_reservoir<span style="color:#f92672">.</span>nunique <span style="color:#f92672">/</span> set_size)</span></span></code></pre></div>
+<pre><code>(986123.3996847824, -0.013973780400211978)
+</code></pre>
+<p>Visualizing the state helps explain the sampling process.</p>
+<ul>
+<li>In the first plot, we see the cumulative sample rate continually decreasing as the number of distinct inputs increases in log-log fashion.</li>
+<li>In the second, we see how the reservoir immediately and greedily fills, then old values are removed as we incorporate new inputs while maintaining that sample rate.</li>
+</ul>
+<p>
+	
+	
+	<img src="/posts/universal-reservoir/images/output_17_0.png"
+	width="630"
+	height="470"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<h2 id="brief-aside-hash-reservoirs-for-approximate-set-operations">Brief aside: hash reservoirs for approximate set operations<a href="#brief-aside-hash-reservoirs-for-approximate-set-operations">
+    <svg role="img" aria-labelledby="brief-aside-hash-reservoirs-for-approximate-set-operations-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="brief-aside-hash-reservoirs-for-approximate-set-operations-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>The hash reservoir is a sketch of the set of input values. Two reservoirs can be compared to approximate set queries (union, intersection, and difference.)</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>values_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span>reservoir_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">12</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>all_values <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>uniform(size<span style="color:#f92672">=</span>values_size)
+</span></span><span style="display:flex;"><span>values_a, values_b <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>choice(all_values, size<span style="color:#f92672">=</span>(<span style="color:#ae81ff">2</span>, values_size))
+</span></span><span style="display:flex;"><span>set_a, set_b <span style="color:#f92672">=</span> set(values_a), set(values_b)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>hashes_a, hashes_b <span style="color:#f92672">=</span> murmurhash(values_a), murmurhash(values_b)
+</span></span><span style="display:flex;"><span>reservoir_a <span style="color:#f92672">=</span> HashReservoir(reservoir_size)<span style="color:#f92672">.</span>update(hashes_a)
+</span></span><span style="display:flex;"><span>reservoir_b <span style="color:#f92672">=</span> HashReservoir(reservoir_size)<span style="color:#f92672">.</span>update(hashes_b)</span></span></code></pre></div>
+<p>Unions are just regular reservoir operations.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>union_est <span style="color:#f92672">=</span> approx_nunique(
+</span></span><span style="display:flex;"><span>    np<span style="color:#f92672">.</span>union1d(reservoir_a<span style="color:#f92672">.</span>hashes, reservoir_b<span style="color:#f92672">.</span>hashes)[reservoir_size],
+</span></span><span style="display:flex;"><span>    reservoir_size,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>union_exact <span style="color:#f92672">=</span> len(set_a<span style="color:#f92672">.</span>union(set_b))
+</span></span><span style="display:flex;"><span>np<span style="color:#f92672">.</span>log(union_est <span style="color:#f92672">/</span> union_exact)</span></span></code></pre></div>
+<pre><code>-0.00542247133431828
+</code></pre>
+<p>Intersections and differences require a little more care. The reservoir with the larger $k$th value should be truncated based on the smaller $k$th value.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>combined_kth <span style="color:#f92672">=</span> min(reservoir_a<span style="color:#f92672">.</span>kth_hash, reservoir_b<span style="color:#f92672">.</span>kth_hash)
+</span></span><span style="display:flex;"><span>rate <span style="color:#f92672">=</span> sample_rate(combined_kth)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sketch_a <span style="color:#f92672">=</span> reservoir_a<span style="color:#f92672">.</span>hashes[reservoir_a<span style="color:#f92672">.</span>hashes <span style="color:#f92672">&lt;=</span> combined_kth]
+</span></span><span style="display:flex;"><span>sketch_b <span style="color:#f92672">=</span> reservoir_b<span style="color:#f92672">.</span>hashes[reservoir_b<span style="color:#f92672">.</span>hashes <span style="color:#f92672">&lt;=</span> combined_kth]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>intersection_est <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>intersect1d(sketch_a, sketch_b)<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">/</span> rate
+</span></span><span style="display:flex;"><span>intersection_exact <span style="color:#f92672">=</span> len(set_a<span style="color:#f92672">.</span>intersection(set_b))
+</span></span><span style="display:flex;"><span>difference_est <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>setdiff1d(sketch_a, sketch_b)<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">/</span> rate
+</span></span><span style="display:flex;"><span>difference_exact <span style="color:#f92672">=</span> len(set_a<span style="color:#f92672">.</span>difference(set_b))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>np<span style="color:#f92672">.</span>log(intersection_est <span style="color:#f92672">/</span> intersection_exact), np<span style="color:#f92672">.</span>log(
+</span></span><span style="display:flex;"><span>    difference_est <span style="color:#f92672">/</span> difference_exact
+</span></span><span style="display:flex;"><span>)</span></span></code></pre></div>
+<pre><code>(0.005515164766810932, -0.038981369615484596)
+</code></pre>
+<p>This will be explored further in a future post.</p>
+<h2 id="what-if-i-need-to-take-a-much-larger-sample">What if I need to take a much larger sample?<a href="#what-if-i-need-to-take-a-much-larger-sample">
+    <svg role="img" aria-labelledby="what-if-i-need-to-take-a-much-larger-sample-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="what-if-i-need-to-take-a-much-larger-sample-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>My friend, it&rsquo;s turtles all the way down.</p>
+<p>As demonstrated above, we get a relatively good estimate of the number of unique values from a relatively small set. That means we can approximate the $k$th hash using a relatively small hash reservoir. (No, there is nothing special about using a reservoir to estimate the number of unique values other than common implementation and ease of inspection. You could just as easily use HyperLogLog or any other count-distinct estimator.)</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ApproximateKth</span>(HashReservoir):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Simple approximation of kth hash value in a large set
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    sample_size : int
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        Target size of the sample
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    reservoir_size : int
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        Size of the reservoir used to approximate our larger sample_size
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, sample_size: int, reservoir_size: int):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>sample_size <span style="color:#f92672">=</span> sample_size
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>reservoir_size <span style="color:#f92672">=</span> reservoir_size
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>reservoir <span style="color:#f92672">=</span> HashReservoir(self<span style="color:#f92672">.</span>reservoir_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">update</span>(self, new_hashes: Iterable[int]):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>reservoir<span style="color:#f92672">.</span>update(new_hashes)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@property</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">kth_hash</span>(self):
+</span></span><span style="display:flex;"><span>        nunique <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>reservoir<span style="color:#f92672">.</span>nunique
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> nunique <span style="color:#f92672">&lt;</span> self<span style="color:#f92672">.</span>sample_size:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> INT_MAX
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> np<span style="color:#f92672">.</span>int32(
+</span></span><span style="display:flex;"><span>            np<span style="color:#f92672">.</span>ceil(INT_MIN <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>sample_size <span style="color:#f92672">/</span> nunique <span style="color:#f92672">*</span> INT_RANGE)
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __repr__(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;ApproximateKth(sample_size=</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>sample_size<span style="color:#e6db74">}</span><span style="color:#e6db74">,&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34; kth_hash=</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>kth_hash<span style="color:#e6db74">}</span><span style="color:#e6db74">, reservoir=</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>reservoir<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#34;</span>
+</span></span><span style="display:flex;"><span>        )</span></span></code></pre></div>
+<p>We can test the efficiency and accuracy of this approach relative to an &ldquo;exact&rdquo; reservoir with a large-but-not-too-large sample size. In this single test, we approximate the $k$th hash with trivial error about 40 times faster with .04 percent of the memory. The computational gains increase as sample size increases. In adtech, for example, there may be use cases for a sample size in the <em>billions</em> (in which case you need to use a 64-bit hash function!).</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>sample_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">7</span>
+</span></span><span style="display:flex;"><span>reservoir_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">**</span><span style="color:#ae81ff">12</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>reservoir <span style="color:#f92672">=</span> HashReservoir(sample_size)
+</span></span><span style="display:flex;"><span>approx <span style="color:#f92672">=</span> ApproximateKth(sample_size, reservoir_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>minibatches <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>minibatch_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">**</span><span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>reservoir_time, approx_time <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> batch <span style="color:#f92672">in</span> tqdm(range(minibatches), leave<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>):
+</span></span><span style="display:flex;"><span>    values <span style="color:#f92672">=</span> random_state<span style="color:#f92672">.</span>uniform(size<span style="color:#f92672">=</span>minibatch_size)
+</span></span><span style="display:flex;"><span>    hashes <span style="color:#f92672">=</span> murmurhash(values)
+</span></span><span style="display:flex;"><span>    reservoir_time <span style="color:#f92672">+=</span> timeit(<span style="color:#66d9ef">lambda</span>: reservoir<span style="color:#f92672">.</span>update(hashes), number<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    approx_time <span style="color:#f92672">+=</span> timeit(<span style="color:#66d9ef">lambda</span>: approx<span style="color:#f92672">.</span>update(hashes), number<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>np<span style="color:#f92672">.</span>log(
+</span></span><span style="display:flex;"><span>    reservoir<span style="color:#f92672">.</span>kth_hash <span style="color:#f92672">/</span> approx<span style="color:#f92672">.</span>kth_hash
+</span></span><span style="display:flex;"><span>), reservoir_time <span style="color:#f92672">/</span> approx_time, reservoir_size <span style="color:#f92672">/</span> sample_size</span></span></code></pre></div>
+<pre><code>  0%|          | 0/1000 [00:00&lt;?, ?it/s]
+
+
+
+
+
+(-0.005558856152514735, 39.34597582366133, 0.0004096)
+</code></pre>
+<h2 id="wrapping-up">Wrapping up<a href="#wrapping-up">
+    <svg role="img" aria-labelledby="wrapping-up-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="wrapping-up-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>The universal reservoir (universal hashing + reservoir sampling) is straightforward to implement. It is subject to few restrictions that makes it useful for applied work, especially as we increase the volume or velocity of input data.</p>
+<p>In a following post, I will demonstrate a worked example of reservoir sampling for answering approximate queries in true real-time.</p>
+
+    </article>
+    <aside>
+      <div class="single-terms">
+        
+          
+          <a class="term" href="https://ptrcknchlsn.xyz/tags/big-data/">big data</a></li>
+          
+        
+      </div>
+      
+  
+  
+  
+
+  <section>
+    <h2>Share</h2>
+    <div class="social-links">
+      <ul class="social-icons--share">
+        
+        
+        
+        
+        
+        
+        
+        
+        <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fptrcknchlsn.xyz%2fposts%2funiversal-reservoir%2f&amp;source=https%3a%2f%2fptrcknchlsn.xyz%2fposts%2funiversal-reservoir%2f&amp;title=Universal%20reservoir%3a%20sampling%20a%20fixed%20number%20of%20elements%20from%20unbounded%20data&amp;summary=Universal%20reservoir%3a%20sampling%20a%20fixed%20number%20of%20elements%20from%20unbounded%20data" target="_blank" rel="noopener" aria-label="Share on LinkedIn" class="social-btn linkedin">
+          <li><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-linkedin" width="24" height="24" viewBox="0 0 352 352" fill="var(--color-primary)"><path d="M0,40v272c0,21.9,18.1,40,40,40h272c21.9,0,40-18.1,40-40V40c0-21.9-18.1-40-40-40H40C18.1,0,0,18.1,0,40z M312,32 c4.6,0,8,3.4,8,8v272c0,4.6-3.4,8-8,8H40c-4.6,0-8-3.4-8-8V40c0-4.6,3.4-8,8-8H312z M59.5,87c0,15.2,12.3,27.5,27.5,27.5 c15.2,0,27.5-12.3,27.5-27.5c0-15.2-12.3-27.5-27.5-27.5C71.8,59.5,59.5,71.8,59.5,87z M187,157h-1v-21h-45v152h47v-75 c0-19.8,3.9-39,28.5-39c24.2,0,24.5,22.4,24.5,40v74h47v-83.5c0-40.9-8.7-72-56.5-72C208.5,132.5,193.3,145.1,187,157z M64,288h47.5 V136H64V288z"/></svg></li>
+        </a>
+        
+        
+        
+        <a href="mailto:?subject=Occasionally%20clever%20-%20Universal%20reservoir%3a%20sampling%20a%20fixed%20number%20of%20elements%20from%20unbounded%20data.&amp;body=Universal%20reservoir%3a%20sampling%20a%20fixed%20number%20of%20elements%20from%20unbounded%20data%2c%20by%20Occasionally%20clever%0a%0a%0ahttps%3a%2f%2fptrcknchlsn.xyz%2fposts%2funiversal-reservoir%2f%0a" target="_blank" class="social-btn email">
+          <li><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-mail" width="24" height="24" viewBox="0 0 416 288" fill="var(--color-primary)"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg></li>
+        </a>
+      </ul>
+    </div>
+  </section>
+  
+        <div class="series">
+          <p>Part of the <a href="https://ptrcknchlsn.xyz/series/universal-sampling/">Universal Sampling</a> series:</p>
+          
+          <ol>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-sampling/">Universal sampling: better sampling for a better tomorrow</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-bootstrap/">Universal bootstrap: a superpower</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/">Bootstrapping in SQL; or, getting s--- done with the tools you have</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/visualization-trick/">A visualization trick obvious in hindsight</a>
+                
+              </li>
+              <li>Universal reservoir: sampling a fixed number of elements from unbounded data<span class="series-this-post">This post!</span>
+                
+              </li>
+          </ol>
+        </div>
+      
+      
+    </aside>
+  </div>
+</div>
+
+    </main><footer>
+    
+    <div class="section footer">
+      <p class="footer-copyright">&copy; 2023 &middot; 
+        Patrick Nicholson
+        
+      </p>
+      
+        <div class="footer-socials">
+          
+<div class="social-links">
+  <ul class="social-icons">
+    
+    
+
+    
+    
+    <li>
+      <a href="https://github.com/patrick-nicholson" target="_blank" rel="noopener" aria-label="Visit Github profile" class="social-btn github">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-github" width="24" height="24" viewBox="0 0 24 24" fill="var(--color-primary)"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </li>
+    
+
+    
+    
+
+    
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nicholsonpatrick" target="_blank" rel="noopener" aria-label="Visit LinkedIn profile" class="social-btn linkedin">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-linkedin" width="24" height="24" viewBox="0 0 352 352" fill="var(--color-primary)"><path d="M0,40v272c0,21.9,18.1,40,40,40h272c21.9,0,40-18.1,40-40V40c0-21.9-18.1-40-40-40H40C18.1,0,0,18.1,0,40z M312,32 c4.6,0,8,3.4,8,8v272c0,4.6-3.4,8-8,8H40c-4.6,0-8-3.4-8-8V40c0-4.6,3.4-8,8-8H312z M59.5,87c0,15.2,12.3,27.5,27.5,27.5 c15.2,0,27.5-12.3,27.5-27.5c0-15.2-12.3-27.5-27.5-27.5C71.8,59.5,59.5,71.8,59.5,87z M187,157h-1v-21h-45v152h47v-75 c0-19.8,3.9-39,28.5-39c24.2,0,24.5,22.4,24.5,40v74h47v-83.5c0-40.9-8.7-72-56.5-72C208.5,132.5,193.3,145.1,187,157z M64,288h47.5 V136H64V288z"/></svg>
+        </a>
+    </li>
+    
+
+    
+    
+    <li>
+      <a href="mailto:?to=patrick.nicholson%40outlook.com" target="_blank" class="social-btn email">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-mail" width="24" height="24" viewBox="0 0 416 288" fill="var(--color-primary)"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+        </div>
+      
+    </div>
+  </footer>
+
+  
+
+
+
+
+
+
+
+
+  
+  
+    
+
+<script src="https://ptrcknchlsn.xyz/main.min.js"></script>
+
+
+
+  
+</body>
+</html>

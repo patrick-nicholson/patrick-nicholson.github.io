@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en-us"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+
+<link rel="stylesheet" href="https://ptrcknchlsn.xyz/scss/main.min.css" />
+  
+<meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  
+
+<title>Bootstrapping in SQL</title>
+
+
+<meta name="author" content="Patrick Nicholson">
+
+<meta name="description" content="Shows how to efficiently bootstrap in SQL">
+<link rel="canonical" href="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Bootstrapping in SQL">
+<meta property="og:description" content="Shows how to efficiently bootstrap in SQL">
+<meta property="og:url" content="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/">
+<meta property="article:published_time" content="2023-02-21T00:00:00-05:00">
+  <meta property="article:modified_time" content="2023-07-12T17:44:51-04:00">
+  
+
+<meta property="og:image" content="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/images/feature.jpeg"/>
+  
+    <meta property="og:image:alt" content="Meme template of Emperor Palpatine saying &#39;I will make it bootstrap&#39;" />
+  
+
+
+
+<meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-reservoir/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/visualization-trick/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-bootstrap/" /><meta property="og:see_also" content="https://ptrcknchlsn.xyz/posts/universal-sampling/" />
+
+
+
+<meta name="twitter:title" content="Bootstrapping in SQL">
+<meta name="twitter:description" content="Shows how to efficiently bootstrap in SQL">
+
+
+<meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:image" content="https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/images/feature.jpeg"/>
+  
+    <meta name="twitter:image:alt" content="Meme template of Emperor Palpatine saying &#39;I will make it bootstrap&#39;">
+  
+
+
+
+
+
+  
+    
+  
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://ptrcknchlsn.xyz/#/schema/person/1",
+      "name": "Patrick Nicholson",
+      "url": "https://ptrcknchlsn.xyz/",
+      "image": {
+        "@type": "ImageObject",
+        "@id": "https://ptrcknchlsn.xyz/#/schema/image/1",
+        "url": "https://ptrcknchlsn.xyz/\u003cnil\u003e",
+        "width": null ,
+        "height": null ,
+        "caption": "Patrick Nicholson"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ptrcknchlsn.xyz/#/schema/website/1",
+      "url": "https://ptrcknchlsn.xyz/",
+      "name": "Occasionally clever",
+      "description": "The personal blog of Patrick Nicholson",
+      "publisher": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/",
+      "url": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/",
+      "name": "Bootstrapping in SQL; or, getting s--- done with the tools you have",
+      "description": "Shows how to efficiently bootstrap in SQL",
+      "isPartOf": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/website/1"
+      },
+      "about": {
+        "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+      },
+      "datePublished": "2023-02-21T00:00:00-05:00",
+      "dateModified": "2023-07-12T17:44:51-04:00",
+      "breadcrumb": {
+        "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/#/schema/breadcrumb/1"
+      },
+      "primaryImageOfPage": {
+        "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/#/schema/image/2"
+      },
+      "inLanguage": "en-US",
+      "potentialAction": [{
+        "@type": "ReadAction", "target": ["https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/"]
+      }]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/#/schema/breadcrumb/1",
+      "name": "Breadcrumbs",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "item": {
+          "@type": "WebPage",
+          "@id": "https://ptrcknchlsn.xyz",
+          "url": "https://ptrcknchlsn.xyz",
+          "name": "Home"
+          }
+        },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "item": {
+          "@type": "WebPage",
+          "@id": "https://ptrcknchlsn.xyz/posts/",
+          "url": "https://ptrcknchlsn.xyz/posts/",
+          "name": "Posts"
+          }
+        },{
+        "@type": "ListItem",
+        "position":  4 ,
+        "item": {
+          "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/"
+          }
+        }]
+    },
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://ptrcknchlsn.xyz/#/schema/article/1",
+          "headline": "Bootstrapping in SQL; or, getting s--- done with the tools you have",
+          "description": "Shows how to efficiently bootstrap in SQL",
+          "isPartOf": {
+            "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/"
+          },
+          "mainEntityOfPage": {
+            "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/"
+          },
+          "datePublished": "2023-02-21T00:00:00-05:00",
+          "dateModified": "2023-07-12T17:44:51-04:00",
+          "author": {
+            "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+          },          
+          "publisher": {
+            "@id": "https://ptrcknchlsn.xyz/#/schema/person/1"
+          },
+          "image": {
+            "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/#/schema/image/2"
+          }
+        }
+      ]
+    },{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ImageObject",
+          "@id": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/#/schema/image/2",
+          "url": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/images/feature.jpeg",
+          "contentUrl": "https://ptrcknchlsn.xyz/posts/bootstrapping-in-sql/images/feature.jpeg",
+          "caption": "Meme template of Emperor Palpatine saying 'I will make it bootstrap'"
+        }
+      ]
+    }
+  ]
+}
+</script>
+  
+
+  
+
+</head><body>
+    <header class="container">
+  <nav class="main-nav" id="js-navbar">
+    
+      <a class="logo" href="https://ptrcknchlsn.xyz">Occasionally clever</a>
+    
+    <ul class="menu" id="js-menu">
+      
+      
+      <li class="menu-item--align">
+        <div class="switch">
+          <input class="switch-input" type="checkbox" id="themeSwitch">
+          <label aria-hidden="true" class="switch-label" for="themeSwitch">On</label>
+          <div aria-hidden="true" class="switch-marker"></div>
+        </div>
+      </li>
+    </ul>
+    <span class="nav-toggle" id="js-navbar-toggle">
+      <svg xmlns="http://www.w3.org/2000/svg" id="Outline" viewBox="0 0 24 24" width="30" height="30" fill="var(--color-contrast-high)"><rect y="11" width="24" height="2" rx="1"/><rect y="4" width="24" height="2" rx="1"/><rect y="18" width="24" height="2" rx="1"/></svg>
+    </span>
+  </nav>
+</header><main class="section">
+<div class="container">
+  <section class="page-header">
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <h1 class="page-header-title">Bootstrapping in SQL; or, getting s--- done with the tools you have</h1>
+    <div class="post-list-meta">
+      <div class="post-list-dates">Posted:
+  Feb 21, 2023&nbsp;&middot;&nbsp;
+    Updated: Jul 12, 2023&nbsp;&middot;&nbsp;7 min.</div>
+      
+      
+    </div>
+    <p class="page-header-desc">
+      <div class="single-feature-img">
+
+
+
+  
+
+
+<img class="feature-image" 
+     srcset="/posts/bootstrapping-in-sql/images/feature.jpeg 480w, /posts/bootstrapping-in-sql/images/feature.jpeg 800w"
+     sizes="(max-width: 600px) 480px, 800px"
+     src="/posts/bootstrapping-in-sql/images/feature.jpeg"
+     alt="Meme template of Emperor Palpatine saying &#39;I will make it bootstrap&#39;">
+</div>SQL is the lingua franca of data platforms. It is many things, but a statistical language is not one of them. In this post, I&#39;ll cover an approach to bootstrap when it&#39;s your best, or only, option.</p>
+      <div class="series">
+        <p>Part of the <a href="https://ptrcknchlsn.xyz/series/universal-sampling/">Universal Sampling</a> series:</p>
+        
+        <ol class="series-list">
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-sampling/">Universal sampling: better sampling for a better tomorrow</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-bootstrap/">Universal bootstrap: a superpower</a>
+              
+            </li>
+            <li>Bootstrapping in SQL; or, getting s--- done with the tools you have<span class="series-this-post">This post!</span>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/visualization-trick/">A visualization trick obvious in hindsight</a>
+              
+            </li>
+            <li>
+                <a href="https://ptrcknchlsn.xyz/posts/universal-reservoir/">Universal reservoir: sampling a fixed number of elements from unbounded data</a>
+              
+            </li>
+        </ol>
+      </div>
+    
+    
+  </section>
+</div>
+<div class="single-container-post">
+  
+
+  <div class="single-post-contents">
+    
+    
+    <article class="markdown">
+        <h1 id="bootstrapping-in-sql-or-getting-s----done-with-the-tools-you-have">Bootstrapping in SQL; or, getting s&mdash; done with the tools you have<a href="#bootstrapping-in-sql-or-getting-s----done-with-the-tools-you-have">
+    <svg role="img" aria-labelledby="bootstrapping-in-sql-or-getting-s----done-with-the-tools-you-have-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="bootstrapping-in-sql-or-getting-s----done-with-the-tools-you-have-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h1><p>
+	
+	
+	
+		
+	<img src="/posts/bootstrapping-in-sql/images/output_2_0.jpg"
+	width="529"
+	height="499"
+	style="
+		background-image: url('data:image/jpg;base64,/9j/2wCEACgcHiMeGSgjISMtKygwPGRBPDc3PHtYXUlkkYCZlo&#43;AjIqgtObDoKrarYqMyP/L2u71////m8H////6/&#43;b9//gBKy0tPDU8dkFBdviljKX4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;Pj4&#43;P/AABEIAC0AMAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5&#43;gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4&#43;Tl5ufo6ery8/T19vf4&#43;fr/2gAMAwEAAhEDEQA/AMwc9qUg0u7A6UMcEUANxjtTgB3FJmjNMVx5ACmmgZpc/JTR1psQ1W3cGhiRTU6091&#43;TNIYgJqSMBjtPU1GOgpyHDg00JjsbGwRQ4AIIqS4GSCBx6ioQcinJWYk7jEU5NS9Y8U4DpQSMjipLIyhApMH0qXIJIIpoYKclAw9DTFYRS46UgGKl86P/AJ4J&#43;ZppYNnChR6UXuKx/9k=');
+		background-position: 50% 50%;
+		background-repeat: no-repeat;
+		background-size: cover;"
+	alt="jpeg" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<p>Bootstrapping has so many useful properties that I often want to apply it everywhere. In my <a href="/2023/02/20/universal-bootstrap/">previous post</a>, I covered the universal bootstrap, a method that combines universal hash functions and the Poisson bootstrap. While I feel that it has strong benefits even in local-analysis tools like Python, it certainly is not the required way to do bootstrapping, so readers may not have immediately grasped its generalization.</p>
+<p>Many common tools built specifically for data science/engineering often have language APIs (e.g., Spark and Flink). In such cases, the bootstrapping methods discussed in that post can be relatively easily adapted to those APIs for an idiomatic and efficient approach. However, not all tools are like this, and we&rsquo;re not always asked or able to do analyses in them anyway.</p>
+<p>SQL is the <em>lingua franca</em> of data platforms. It is many things, but a statistical language is not one of them. In this post, I&rsquo;ll cover an approach to bootstrap when it&rsquo;s your best, or only, option. However, to my knowledge there will be differences in implementation details or idioms that will need to differ between platforms. I&rsquo;m only covering Postgres here, but it should be enough to get you started with any vendor.</p>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> sqlalchemy <span style="color:#f92672">import</span> create_engine
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>postgres <span style="color:#f92672">=</span> create_engine(<span style="color:#e6db74">&#34;postgresql+psycopg://localhost:5432/postgres&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">read_postgres</span>(query):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Simple wrapper to read from postgres&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> sqlalchemy <span style="color:#f92672">import</span> text
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> postgres<span style="color:#f92672">.</span>connect() <span style="color:#66d9ef">as</span> con:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> pd<span style="color:#f92672">.</span>read_sql(text(query), con)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">execute_postgres</span>(stmt):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Simple wrapper to execute a statement&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> sqlalchemy <span style="color:#f92672">import</span> text
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> postgres<span style="color:#f92672">.</span>connect() <span style="color:#66d9ef">as</span> con:
+</span></span><span style="display:flex;"><span>        con<span style="color:#f92672">.</span>execute(text(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;BEGIN;</span><span style="color:#e6db74">{</span>stmt<span style="color:#e6db74">}</span><span style="color:#e6db74">;END;&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">display_sql</span>(text):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Prettier display of my SQL strings&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Markdown(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;```sql</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>text<span style="color:#e6db74">}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">```&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>iris<span style="color:#f92672">.</span>rename_axis(<span style="color:#e6db74">&#34;row_id&#34;</span>)<span style="color:#f92672">.</span>to_sql(<span style="color:#e6db74">&#34;iris&#34;</span>, postgres, if_exists<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;replace&#34;</span>)
+</span></span><span style="display:flex;"><span>test_scores<span style="color:#f92672">.</span>to_sql(<span style="color:#e6db74">&#34;test_scores&#34;</span>, postgres, index<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, if_exists<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;replace&#34;</span>)</span></span></code></pre></div>
+<h2 id="baby-wants-sql">Baby wants SQL<a href="#baby-wants-sql">
+    <svg role="img" aria-labelledby="baby-wants-sql-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="baby-wants-sql-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>Suppose <code>iris</code> is a Postgres table and we want to get the bootstrap distribution of a statistic. A naive way to do this is to repeatedly query the table. A better way is to use the universal bootstrap.</p>
+<p>Postgres does not have a fast, non-cryptographic hash function by default. There are some extensions available that provide them, and you could write a user-defined function to expose one from another language. However, to demonstrate that this is possible in pure SQL, I use MD5 as my hashing function. Postgres&rsquo;s MD5 returns 128 hex-encoded bits from a text input; I just take the first 32 bits as an integer (<code>int4</code> in Postgres).</p>
+
+
+  <span class="code-language">sql</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Create a 32-bit hash from text
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  col TEXT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The source column to hash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Returns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  -------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  int4
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    32-bit hash value
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">OR</span> <span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">FUNCTION</span> hash(col TEXT)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">RETURNS</span> INT
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> (<span style="color:#e6db74">&#39;x&#39;</span> <span style="color:#f92672">||</span> MD5(col))::BIT(<span style="color:#ae81ff">128</span>)::BIT(<span style="color:#ae81ff">32</span>)::INT
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">LANGUAGE</span> <span style="color:#66d9ef">sql</span>;</span></span></code></pre></div>
+<p>Next, we need a way to randomize hashes. The approach is the same as in the previous post: multiply the uniform hash value by another random uniform integer.</p>
+<ul>
+<li>Our source of random values in Postgres is random uniform values in (0, 1); these are easily converted to integers in $\left[ -2^{31}, 2^{31} \right)$</li>
+<li>Multiplication is not as simple because Postgres doesn&rsquo;t wrap integer math; it&rsquo;s easy enough to get around this by multiplying in <code>bigint</code> and modulo-ing back down to <code>int</code></li>
+</ul>
+
+
+  <span class="code-language">sql</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Generate an arbitrary number of random integers (int4)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  num INT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The number of random values
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  seed DOUBLE PRECISION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The random number generator seed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Returns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  -------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ARRAY
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    An array of length num
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">OR</span> <span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">FUNCTION</span> generate_random_integers(num INT)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">RETURNS</span> INT[]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    ARRAY_AGG(FLOOR(RANDOM() <span style="color:#f92672">*</span> <span style="color:#ae81ff">4294967296</span> <span style="color:#f92672">+</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">2147483648</span>)::INT)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>    GENERATE_SERIES(<span style="color:#ae81ff">1</span>, num)
+</span></span><span style="display:flex;"><span>;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">LANGUAGE</span> <span style="color:#66d9ef">sql</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Performs wrapped 32-bit multiplication
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  x, y INT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    Values to multiply
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Returns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  -------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  INT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    Result of multiplication with wrapping
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">OR</span> <span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">FUNCTION</span> wrapped_multiply(x INT, y INT)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">RETURNS</span> INT
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> ((((x::BIGINT <span style="color:#f92672">*</span> y) <span style="color:#f92672">%</span> <span style="color:#ae81ff">4294967296</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">4294967296</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">4294967296</span>)::BIT(<span style="color:#ae81ff">32</span>)::INT
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">LANGUAGE</span> <span style="color:#66d9ef">SQL</span>;</span></span></code></pre></div>
+<p>Next, we need to map uniform integers to Poisson values. This is straightforward using a <a href="https://en.wikipedia.org/wiki/Poisson_distribution#Random_variate_generation" target="_blank" rel="noopener">simple inverse transform sampling method</a> for a very high value of the CDF.</p>
+
+
+  <span class="code-language">sql</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TYPE</span> poisson_cdf_interval <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span>(
+</span></span><span style="display:flex;"><span>    cdf_lower INT,
+</span></span><span style="display:flex;"><span>    cdf_upper INT,
+</span></span><span style="display:flex;"><span>    poisson_value INT
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Map the 32-bit integer range to a Poisson distribution
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  lambda DOUBLE PRECISION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The mean of the distribution
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Returns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  -------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ARRAY
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    Array of inclusive integer ranges and associated Poisson values
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">OR</span> <span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">FUNCTION</span> generate_poisson_cdf(lambda DOUBLE <span style="color:#66d9ef">PRECISION</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">RETURNS</span> poisson_cdf_interval[]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">RECURSIVE</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>quantiles <span style="color:#66d9ef">AS</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">AS</span> x, 
+</span></span><span style="display:flex;"><span>        EXP(<span style="color:#f92672">-</span>lambda) <span style="color:#66d9ef">AS</span> p, 
+</span></span><span style="display:flex;"><span>        EXP(<span style="color:#f92672">-</span>lambda) <span style="color:#66d9ef">AS</span> s
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">UNION</span> <span style="color:#66d9ef">ALL</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> 
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, 
+</span></span><span style="display:flex;"><span>        p <span style="color:#f92672">*</span> lambda <span style="color:#f92672">/</span> (x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>), 
+</span></span><span style="display:flex;"><span>        s <span style="color:#f92672">+</span> p <span style="color:#f92672">*</span> lambda <span style="color:#f92672">/</span> (x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span> 
+</span></span><span style="display:flex;"><span>        quantiles
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">WHERE</span> s <span style="color:#f92672">&lt;</span> .<span style="color:#ae81ff">999999</span>    ),
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>rights <span style="color:#66d9ef">AS</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> FLOOR(s <span style="color:#f92672">*</span> <span style="color:#ae81ff">4294967296</span> <span style="color:#f92672">+</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">2147483648</span>) <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">upper</span>, x <span style="color:#66d9ef">AS</span> value
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span> quantiles
+</span></span><span style="display:flex;"><span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>intmax <span style="color:#66d9ef">AS</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">2147483647</span> <span style="color:#66d9ef">AS</span> maxval,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">MAX</span>(<span style="color:#66d9ef">upper</span>) <span style="color:#66d9ef">AS</span> maxright,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">MAX</span>(value) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">AS</span> value
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>        rights
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span>
+</span></span><span style="display:flex;"><span>        maxval
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">HAVING</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">MAX</span>(<span style="color:#66d9ef">upper</span>) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">2147483647</span>
+</span></span><span style="display:flex;"><span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>uppers <span style="color:#66d9ef">AS</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">upper</span>, value <span style="color:#66d9ef">FROM</span> rights
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">UNION</span> <span style="color:#66d9ef">ALL</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> maxval <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">upper</span>, value <span style="color:#66d9ef">FROM</span> intmax
+</span></span><span style="display:flex;"><span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>lowers <span style="color:#66d9ef">AS</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>        COALESCE(LAG(<span style="color:#66d9ef">upper</span>) OVER (<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> value) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">2147483648</span>) <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">lower</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">upper</span>,
+</span></span><span style="display:flex;"><span>        value
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>        uppers
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    ARRAY_AGG(<span style="color:#66d9ef">ROW</span> (<span style="color:#66d9ef">lower</span>, <span style="color:#66d9ef">upper</span>, value)::poisson_cdf_interval)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>    lowers
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">LANGUAGE</span> <span style="color:#66d9ef">sql</span>;</span></span></code></pre></div>
+<p>Finally, we compose this all together. A bootstrap is configured by the sample fraction(s) we need to draw from the original dataset and the number of times we need to do it. For full reproducibility, we also expose a Postgres random number generator seed [in Postgres, this is a float in (0, 1)].</p>
+
+
+  <span class="code-language">sql</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TYPE</span> bootstrap_group_configuration <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span>(
+</span></span><span style="display:flex;"><span>    group_index INT,
+</span></span><span style="display:flex;"><span>    random_integers INT[],
+</span></span><span style="display:flex;"><span>    poisson_cdf poisson_cdf_interval[]
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Configure a bootstrap
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  group_fractions ARRAY
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    Resampling fractions for each group
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  replications INT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The number of bootstrap replications
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  seed DOUBLE PRECISION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The random number generator seed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">FUNCTION</span> configure_bootstrap(group_fractions DOUBLE <span style="color:#66d9ef">PRECISION</span>[], replications INT, seed DOUBLE <span style="color:#66d9ef">PRECISION</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">RETURNS</span> bootstrap_group_configuration[]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> SETSEED(seed);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    ARRAY_AGG(<span style="color:#66d9ef">ROW</span>(groups.<span style="color:#f92672">*</span>)::bootstrap_group_configuration)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>        ix <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>        generate_random_integers(replications),
+</span></span><span style="display:flex;"><span>        generate_poisson_cdf(frac)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">UNNEST</span>(group_fractions) <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">ORDINALITY</span> <span style="color:#66d9ef">AS</span> t(frac, ix)
+</span></span><span style="display:flex;"><span>) groups;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">LANGUAGE</span> <span style="color:#66d9ef">sql</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Resample a table based on the hash value of the input and a
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  bootstrapping configuration
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  col TEXT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    The source column to hash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  config bootstrap_group_configuration[]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    A configuration array returned by the `configure_bootstrap` function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  Returns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  -------
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  SET
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    A set of rows for the bootstrap results
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">OR</span> <span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">FUNCTION</span> poisson_bootstrap(col TEXT, config bootstrap_group_configuration[])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">RETURNS</span> <span style="color:#66d9ef">TABLE</span> (__replication_index INT, __group_index INT)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> weights <span style="color:#66d9ef">as</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>        randomize.hash_ix <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">as</span> replication,
+</span></span><span style="display:flex;"><span>        group_config.group_index,
+</span></span><span style="display:flex;"><span>        poisson.poisson_value
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>        (<span style="color:#66d9ef">select</span> hash(col) <span style="color:#66d9ef">as</span> hashed) <span style="color:#66d9ef">AS</span> hashing,
+</span></span><span style="display:flex;"><span>        (<span style="color:#66d9ef">select</span> (<span style="color:#66d9ef">unnest</span>(config)::bootstrap_group_configuration).<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> group_config,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">lateral</span> <span style="color:#66d9ef">unnest</span>(group_config.random_integers) <span style="color:#66d9ef">with</span> <span style="color:#66d9ef">ordinality</span> <span style="color:#66d9ef">AS</span> randomize(randint, hash_ix),
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">lateral</span> (<span style="color:#66d9ef">select</span> (<span style="color:#66d9ef">unnest</span>(group_config.poisson_cdf)::poisson_cdf_interval).<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> poisson
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">WHERE</span>
+</span></span><span style="display:flex;"><span>        wrapped_multiply(hashing.hashed, randomize.randint) <span style="color:#66d9ef">BETWEEN</span> poisson.cdf_lower <span style="color:#66d9ef">AND</span> poisson.cdf_upper
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    replication,
+</span></span><span style="display:flex;"><span>    group_index
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span>    weights,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">lateral</span> generate_series(<span style="color:#ae81ff">1</span>, poisson_value)
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">LANGUAGE</span> <span style="color:#66d9ef">sql</span>;</span></span></code></pre></div>
+<p>The <code>poisson_bootstrap</code> is called as a <code>LATERAL</code> expression in a query, producing and average of (number of groups) $\times$ (number of replications) $\times$ (average of sample fractions) output rows for each input row, with <code>__replication_index</code> and <code>__group_index</code> columns providing the necessary identification.</p>
+<p>Baby, let&rsquo;s bootstrap. It&rsquo;s simply an aggregation including the necessary bootstrap columns in the grouping.</p>
+
+
+  <span class="code-language">sql</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> 
+</span></span><span style="display:flex;"><span>    __replication_index, 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">count</span>(<span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">as</span> samples, 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">count</span>(<span style="color:#66d9ef">distinct</span> row_id) <span style="color:#66d9ef">as</span> units, 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">avg</span>(sepal_length) <span style="color:#66d9ef">as</span> estimate
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">from</span> 
+</span></span><span style="display:flex;"><span>    iris, 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">lateral</span> poisson_bootstrap(row_id::text, configure_bootstrap(ARRAY[<span style="color:#ae81ff">1</span>], <span style="color:#ae81ff">200</span>, .<span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">group</span> <span style="color:#66d9ef">by</span> <span style="color:#ae81ff">1</span></span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots(
+</span></span><span style="display:flex;"><span>    nrows<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>, figsize<span style="color:#f92672">=</span>(plt<span style="color:#f92672">.</span>rcParams[<span style="color:#e6db74">&#34;figure.figsize&#34;</span>][:<span style="color:#ae81ff">1</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>sharex(ax[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">3</span>]<span style="color:#f92672">.</span>sharex(ax[<span style="color:#ae81ff">2</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>hist(baby[<span style="color:#e6db74">&#34;samples&#34;</span>], bins<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>axvline(len(iris), color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;red&#34;</span>, ls<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Sample size in each replication vs. original size&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>hist(baby[<span style="color:#e6db74">&#34;units&#34;</span>], bins<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Unique units in each replication&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>hist(baby[<span style="color:#e6db74">&#34;estimate&#34;</span>], bins<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>axvline(iris[<span style="color:#e6db74">&#34;sepal_length&#34;</span>]<span style="color:#f92672">.</span>mean(), color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;red&#34;</span>, ls<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;SQL bootstrap distribution vs. point estimate&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">3</span>]<span style="color:#f92672">.</span>hist(poisson_baby_null, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">3</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;Reference Poisson bootstrap distribution from previous post&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig<span style="color:#f92672">.</span>tight_layout();</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/bootstrapping-in-sql/images/output_16_0.png"
+	width="629"
+	height="630"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<h2 id="hypothesis-testing">Hypothesis testing<a href="#hypothesis-testing">
+    <svg role="img" aria-labelledby="hypothesis-testing-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="hypothesis-testing-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>Yes, you can even do this in SQL. Since difference-in-differences has a simple analytical solution, I&rsquo;m going to repeat the educational intervention analysis from my previous post. All of the functionality required to do this is included in the functions above. The only change I need to make is configuring the bootstrap for two groups (test and control).</p>
+
+
+  <span class="code-language">sql</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">with</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>configure <span style="color:#66d9ef">as</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> configure_bootstrap(array[<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">75</span>, <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">25</span>], <span style="color:#ae81ff">200</span>, .<span style="color:#ae81ff">5</span>) <span style="color:#66d9ef">as</span> config
+</span></span><span style="display:flex;"><span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>bootstrap <span style="color:#66d9ef">as</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> 
+</span></span><span style="display:flex;"><span>        __replication_index, 
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">when</span> __group_index <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">then</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">else</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">end</span> test, 
+</span></span><span style="display:flex;"><span>        post_period <span style="color:#66d9ef">as</span> post,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">avg</span>(score) <span style="color:#66d9ef">as</span> cell,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">count</span>(<span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">as</span> samples
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">from</span>
+</span></span><span style="display:flex;"><span>        test_scores,
+</span></span><span style="display:flex;"><span>        configure,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">lateral</span> poisson_bootstrap(class_id::text, configure.config)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">group</span> <span style="color:#66d9ef">by</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pivot <span style="color:#66d9ef">as</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span>
+</span></span><span style="display:flex;"><span>        __replication_index,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">sum</span>(samples) <span style="color:#66d9ef">as</span> samples,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">sum</span>(cell <span style="color:#f92672">*</span> test <span style="color:#f92672">*</span> post) <span style="color:#66d9ef">as</span> test_post,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">sum</span>(cell <span style="color:#f92672">*</span> test <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> post)) <span style="color:#66d9ef">as</span> test_pre,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">sum</span>(cell <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> test) <span style="color:#f92672">*</span> post) <span style="color:#66d9ef">as</span> control_post,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">sum</span>(cell <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> test) <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> post)) <span style="color:#66d9ef">as</span> control_pre
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">from</span>
+</span></span><span style="display:flex;"><span>        bootstrap
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">group</span> <span style="color:#66d9ef">by</span>
+</span></span><span style="display:flex;"><span>        __replication_index
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">select</span>
+</span></span><span style="display:flex;"><span>    __replication_index,
+</span></span><span style="display:flex;"><span>    samples,
+</span></span><span style="display:flex;"><span>    (test_post <span style="color:#f92672">-</span> test_pre) <span style="color:#f92672">-</span> (control_post <span style="color:#f92672">-</span> control_pre) <span style="color:#66d9ef">as</span> estimate
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">from</span>
+</span></span><span style="display:flex;"><span>    pivot</span></span></code></pre></div>
+
+
+  <span class="code-language">python</span><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>fig, ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots(nrows<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, sharex<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>bins <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>histogram_bin_edges(np<span style="color:#f92672">.</span>r_[edu_point_est, edu_null], <span style="color:#ae81ff">15</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>hist(edu[<span style="color:#e6db74">&#34;estimate&#34;</span>], bins<span style="color:#f92672">=</span>bins)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>axvline(edu_point_est, color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;red&#34;</span>, ls<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>set_title(<span style="color:#e6db74">&#34;SQL bootstrap clustered null distribution vs. point estimate&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>hist(edu_null, bins<span style="color:#f92672">=</span>bins)
+</span></span><span style="display:flex;"><span>ax[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>set_title(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;Reference Poisson bootstrap null distribution from previous post&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig<span style="color:#f92672">.</span>tight_layout();</span></span></code></pre></div>
+<p>
+	
+	
+	<img src="/posts/bootstrapping-in-sql/images/output_19_0.png"
+	width="630"
+	height="470"
+	
+	alt="png" 
+	class="single-post-image" 
+	loading="lazy"
+	decoding="async"
+	>
+</p>
+<h2 id="wrapping-up">Wrapping up<a href="#wrapping-up">
+    <svg role="img" aria-labelledby="wrapping-up-IconTitle" fill="var(--color-primary)" height="22" viewBox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+      <title id="wrapping-up-IconTitle">Link to this heading</title>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76.0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71.0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71.0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76.0 5-2.24 5-5s-2.24-5-5-5z"></path>
+    </svg>
+  </a>
+</h2><p>You now have the power to bootstrap in SQL, unlocking richer analysis in a traditional RDBMS, visualization tools, Snowflake (sigh), or anywhere else you prefer to use SQL. Go make your DBadmins feel it.</p>
+
+    </article>
+    <aside>
+      <div class="single-terms">
+        
+          
+          <a class="term" href="https://ptrcknchlsn.xyz/tags/computational-statistics/">computational statistics</a></li>
+          
+          <a class="term" href="https://ptrcknchlsn.xyz/tags/sql/">sql</a></li>
+          
+          <a class="term" href="https://ptrcknchlsn.xyz/tags/bootstrapping/">bootstrapping</a></li>
+          
+          <a class="term" href="https://ptrcknchlsn.xyz/tags/big-data/">big data</a></li>
+          
+        
+      </div>
+      
+  
+  
+  
+
+  <section>
+    <h2>Share</h2>
+    <div class="social-links">
+      <ul class="social-icons--share">
+        
+        
+        
+        
+        
+        
+        
+        
+        <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fptrcknchlsn.xyz%2fposts%2fbootstrapping-in-sql%2f&amp;source=https%3a%2f%2fptrcknchlsn.xyz%2fposts%2fbootstrapping-in-sql%2f&amp;title=Bootstrapping%20in%20SQL%3b%20or%2c%20getting%20s---%20done%20with%20the%20tools%20you%20have&amp;summary=Bootstrapping%20in%20SQL%3b%20or%2c%20getting%20s---%20done%20with%20the%20tools%20you%20have" target="_blank" rel="noopener" aria-label="Share on LinkedIn" class="social-btn linkedin">
+          <li><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-linkedin" width="24" height="24" viewBox="0 0 352 352" fill="var(--color-primary)"><path d="M0,40v272c0,21.9,18.1,40,40,40h272c21.9,0,40-18.1,40-40V40c0-21.9-18.1-40-40-40H40C18.1,0,0,18.1,0,40z M312,32 c4.6,0,8,3.4,8,8v272c0,4.6-3.4,8-8,8H40c-4.6,0-8-3.4-8-8V40c0-4.6,3.4-8,8-8H312z M59.5,87c0,15.2,12.3,27.5,27.5,27.5 c15.2,0,27.5-12.3,27.5-27.5c0-15.2-12.3-27.5-27.5-27.5C71.8,59.5,59.5,71.8,59.5,87z M187,157h-1v-21h-45v152h47v-75 c0-19.8,3.9-39,28.5-39c24.2,0,24.5,22.4,24.5,40v74h47v-83.5c0-40.9-8.7-72-56.5-72C208.5,132.5,193.3,145.1,187,157z M64,288h47.5 V136H64V288z"/></svg></li>
+        </a>
+        
+        
+        
+        <a href="mailto:?subject=Occasionally%20clever%20-%20Bootstrapping%20in%20SQL%3b%20or%2c%20getting%20s---%20done%20with%20the%20tools%20you%20have.&amp;body=Bootstrapping%20in%20SQL%3b%20or%2c%20getting%20s---%20done%20with%20the%20tools%20you%20have%2c%20by%20Occasionally%20clever%0aShows%20how%20to%20efficiently%20bootstrap%20in%20SQL%0a%0ahttps%3a%2f%2fptrcknchlsn.xyz%2fposts%2fbootstrapping-in-sql%2f%0a" target="_blank" class="social-btn email">
+          <li><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-mail" width="24" height="24" viewBox="0 0 416 288" fill="var(--color-primary)"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg></li>
+        </a>
+      </ul>
+    </div>
+  </section>
+  
+        <div class="series">
+          <p>Part of the <a href="https://ptrcknchlsn.xyz/series/universal-sampling/">Universal Sampling</a> series:</p>
+          
+          <ol>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-sampling/">Universal sampling: better sampling for a better tomorrow</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-bootstrap/">Universal bootstrap: a superpower</a>
+                
+              </li>
+              <li>Bootstrapping in SQL; or, getting s--- done with the tools you have<span class="series-this-post">This post!</span>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/visualization-trick/">A visualization trick obvious in hindsight</a>
+                
+              </li>
+              <li>
+                  <a href="https://ptrcknchlsn.xyz/posts/universal-reservoir/">Universal reservoir: sampling a fixed number of elements from unbounded data</a>
+                
+              </li>
+          </ol>
+        </div>
+      
+      
+    </aside>
+  </div>
+</div>
+
+    </main><footer>
+    
+    <div class="section footer">
+      <p class="footer-copyright">&copy; 2023 &middot; 
+        Patrick Nicholson
+        
+      </p>
+      
+        <div class="footer-socials">
+          
+<div class="social-links">
+  <ul class="social-icons">
+    
+    
+
+    
+    
+    <li>
+      <a href="https://github.com/patrick-nicholson" target="_blank" rel="noopener" aria-label="Visit Github profile" class="social-btn github">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-github" width="24" height="24" viewBox="0 0 24 24" fill="var(--color-primary)"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </li>
+    
+
+    
+    
+
+    
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nicholsonpatrick" target="_blank" rel="noopener" aria-label="Visit LinkedIn profile" class="social-btn linkedin">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-linkedin" width="24" height="24" viewBox="0 0 352 352" fill="var(--color-primary)"><path d="M0,40v272c0,21.9,18.1,40,40,40h272c21.9,0,40-18.1,40-40V40c0-21.9-18.1-40-40-40H40C18.1,0,0,18.1,0,40z M312,32 c4.6,0,8,3.4,8,8v272c0,4.6-3.4,8-8,8H40c-4.6,0-8-3.4-8-8V40c0-4.6,3.4-8,8-8H312z M59.5,87c0,15.2,12.3,27.5,27.5,27.5 c15.2,0,27.5-12.3,27.5-27.5c0-15.2-12.3-27.5-27.5-27.5C71.8,59.5,59.5,71.8,59.5,87z M187,157h-1v-21h-45v152h47v-75 c0-19.8,3.9-39,28.5-39c24.2,0,24.5,22.4,24.5,40v74h47v-83.5c0-40.9-8.7-72-56.5-72C208.5,132.5,193.3,145.1,187,157z M64,288h47.5 V136H64V288z"/></svg>
+        </a>
+    </li>
+    
+
+    
+    
+    <li>
+      <a href="mailto:?to=patrick.nicholson%40outlook.com" target="_blank" class="social-btn email">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-mail" width="24" height="24" viewBox="0 0 416 288" fill="var(--color-primary)"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+        </div>
+      
+    </div>
+  </footer>
+
+  
+
+
+
+
+
+
+
+
+  
+  
+    
+
+<script src="https://ptrcknchlsn.xyz/main.min.js"></script>
+
+
+
+  
+</body>
+</html>
