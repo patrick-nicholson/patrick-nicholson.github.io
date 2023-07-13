@@ -1,0 +1,1 @@
+Now redirects to [ptrcknchlsn.xyx](https://ptrcknchlsn.xyx)
